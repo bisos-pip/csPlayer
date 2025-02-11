@@ -6,7 +6,7 @@
 
 ####+BEGIN: bx:icm:python:top-of-file :partof "bystar" :copyleft "halaal+minimal"
 """
-*  This file:/de/bx/nne/dev-py/pypi/pkgs/blee/icmPlayer/dev/bin/bleeIcmPlayer.py :: [[elisp:(org-cycle)][| ]]
+*  This file:/de/bx/nne/dev-py/pypi/pkgs/bisos.csPlayer/dev/bin/bleeIcmPlayer.py :: [[elisp:(org-cycle)][| ]]
  is part of The Libre-Halaal ByStar Digital Ecosystem. http://www.by-star.net
  *CopyLeft*  This Software is a Libre-Halaal Poly-Existential. See http://www.freeprotocols.org
  A Python Interactively Command Module (PyICM). Part Of ByStar.
@@ -70,7 +70,7 @@ import collections
 from unisos import ucf
 from unisos import icm
 
-from blee.icmPlayer import bleep
+from bisos.csPlayer import bleep
 
 g_importedCmnds = {        # Enumerate modules from which CMNDs become invokable
     'bleep': bleep.__file__,
@@ -281,7 +281,7 @@ class examples(icm.Cmnd):
         
         icm.G_commonBriefExamples()    
 
-        bleep.examples_icmBasic()
+        bleep.examples_csBasic()
         
 ####+BEGIN: bx:icm:python:cmnd:subSection :title "Dev And Testing"
         """

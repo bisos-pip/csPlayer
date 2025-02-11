@@ -120,17 +120,17 @@ def commonParamsSpecify(
 
 
 
-####+BEGIN: bx:cs:python:func :funcName "examples_icmBasic" :funcType "void" :retType "bool" :deco "" :argsList ""
+####+BEGIN: bx:cs:python:func :funcName "examples_csBasic" :funcType "void" :retType "bool" :deco "" :argsList ""
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-void     [[elisp:(outline-show-subtree+toggle)][||]] /examples_icmBasic/ retType=bool argsList=nil  [[elisp:(org-cycle)][| ]]
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-void     [[elisp:(outline-show-subtree+toggle)][||]] /examples_csBasic/ retType=bool argsList=nil  [[elisp:(org-cycle)][| ]]
 #+end_org """
-def examples_icmBasic():
+def examples_csBasic():
 ####+END:
     def cpsInit(): return collections.OrderedDict()
     def menuItem(): cs.examples.cmndInsert(cmndName, cps, cmndArgs, verbosity='little')
     #def execLineEx(cmndStr): cs.examples.execInsert(execLine=cmndStr)
 
-    cs.examples.menuChapter('*Blee ICM Player (Update, Start, StartUpdated)*')
+    cs.examples.menuChapter('*Blee Command Services Player (Update, Start, StartUpdated)*')
 
     cmndName = "bleepUpdate"
     cps = cpsInit(); cmndArgs = ""; menuItem()
@@ -477,7 +477,7 @@ iicmName={iicmName}
 ####+END:
 
 ####+BEGIN: iicm:py:panel:module-title :mode "default"
-*  *Py Module* :: Execute [[elisp:(lsip-local-run-command-here "{iicmName}")][{iicmName}]] or Visit [[elisp:(lsip-local-run-command-here "{iicmName} -i visit")][ *={iicmName}=* ]] in =file:/bisos/git/auth/bxRepos/blee-pip/csPlayer/py3/blee/csPlayer/=
+*  *Py Module* :: Execute [[elisp:(lsip-local-run-command-here "{iicmName}")][{iicmName}]] or Visit [[elisp:(lsip-local-run-command-here "{iicmName} -i visit")][ *={iicmName}=* ]] in =file:/bisos/git/auth/bxRepos/blee-pip/csPlayer/py3/bisos.csPlayer/=
 *  =Summary=   ::  A basic example and starting point for IICM (Interactively Invokable Command Modules.).
 ####+END:
 * 
