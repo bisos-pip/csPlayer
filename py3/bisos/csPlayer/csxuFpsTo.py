@@ -1,0 +1,727 @@
+# -*- coding: utf-8 -*-
+
+""" #+begin_org
+* ~[Summary]~ :: A =CS-Unit= for converting CSXU FPs to their equivalent as a python directory and graphviz.
+#+end_org """
+
+####+BEGIN: b:py3:cs:file/dblockControls :classification "cs-u"
+""" #+begin_org
+* [[elisp:(org-cycle)][| /Control Parameters Of This File/ |]] :: dblk ctrls classifications=cs-u
+#+BEGIN_SRC emacs-lisp
+(setq-local b:dblockControls t) ; (setq-local b:dblockControls nil)
+(put 'b:dblockControls 'py3:cs:Classification "cs-u") ; one of cs-mu, cs-u, cs-lib, bpf-lib, pyLibPure
+#+END_SRC
+#+RESULTS:
+: cs-u
+#+end_org """
+####+END:
+
+####+BEGIN: b:prog:file/proclamations :outLevel 1
+""" #+begin_org
+* *[[elisp:(org-cycle)][| Proclamations |]]* :: Libre-Halaal Software --- Part Of BISOS ---  Poly-COMEEGA Format.
+** This is Libre-Halaal Software. © Neda Communications, Inc. Subject to AGPL.
+** It is part of BISOS (ByStar Internet Services OS)
+** Best read and edited  with Blee in Poly-COMEEGA (Polymode Colaborative Org-Mode Enhance Emacs Generalized Authorship)
+#+end_org """
+####+END:
+
+####+BEGIN: b:prog:file/particulars :authors ("./inserts/authors-mb.org")
+""" #+begin_org
+* *[[elisp:(org-cycle)][| Particulars |]]* :: Authors, version
+** This File: /bisos/git/bxRepos/bisos-pip/csPlayer/py3/bisos/csPlayer/csmuFpsTo.py
+** File True Name: /bisos/git/auth/bxRepos/bisos-pip/csPlayer/py3/bisos/csPlayer/csmuFpsTo.py
+** Authors: Mohsen BANAN, http://mohsen.banan.1.byname.net/contact
+#+end_org """
+####+END:
+
+####+BEGIN: b:py3:file/particulars-csInfo :status "inUse"
+""" #+begin_org
+* *[[elisp:(org-cycle)][| Particulars-csInfo |]]*
+#+end_org """
+import typing
+csInfo: typing.Dict[str, typing.Any] = { 'moduleName': ['csmuFpsTo'], }
+csInfo['version'] = '202601110653'
+csInfo['status']  = 'inUse'
+csInfo['panel'] = 'csmuFpsTo-Panel.org'
+csInfo['groupingType'] = 'IcmGroupingType-pkged'
+csInfo['cmndParts'] = 'IcmCmndParts[common] IcmCmndParts[param]'
+####+END:
+
+""" #+begin_org
+* [[elisp:(org-cycle)][| ~Description~ |]] :: [[file:/bisos/git/auth/bxRepos/blee-binders/bisos-core/COMEEGA/_nodeBase_/fullUsagePanel-en.org][BISOS COMEEGA Panel]]
+This a =Cs-Unit= for running the equivalent of facter in py and remotely with rpyc.
+With BISOS, it is used in CMDB remotely.
+
+** Relevant Panels:
+** Status: In use with BISOS
+** /[[elisp:(org-cycle)][| Planned Improvements |]]/ :
+*** TODO complete fileName in particulars.
+#+end_org """
+
+####+BEGIN: b:prog:file/orgTopControls :outLevel 1
+""" #+begin_org
+* [[elisp:(org-cycle)][| Controls |]] :: [[elisp:(delete-other-windows)][(1)]] | [[elisp:(show-all)][Show-All]]  [[elisp:(org-shifttab)][Overview]]  [[elisp:(progn (org-shifttab) (org-content))][Content]] | [[file:Panel.org][Panel]] | [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] | [[elisp:(bx:org:run-me)][Run]] | [[elisp:(bx:org:run-me-eml)][RunEml]] | [[elisp:(progn (save-buffer) (kill-buffer))][S&Q]]  [[elisp:(save-buffer)][Save]]  [[elisp:(kill-buffer)][Quit]] [[elisp:(org-cycle)][| ]]
+** /Version Control/ ::  [[elisp:(call-interactively (quote cvs-update))][cvs-update]]  [[elisp:(vc-update)][vc-update]] | [[elisp:(bx:org:agenda:this-file-otherWin)][Agenda-List]]  [[elisp:(bx:org:todo:this-file-otherWin)][ToDo-List]]
+
+#+end_org """
+####+END:
+
+####+BEGIN: b:py3:file/workbench :outLevel 1
+""" #+begin_org
+* [[elisp:(org-cycle)][| Workbench |]] :: [[elisp:(python-check (format "/bisos/venv/py3/bisos3/bin/python -m pyclbr %s" (bx:buf-fname))))][pyclbr]] || [[elisp:(python-check (format "/bisos/venv/py3/bisos3/bin/python -m pydoc ./%s" (bx:buf-fname))))][pydoc]] || [[elisp:(python-check (format "/bisos/pipx/bin/pyflakes %s" (bx:buf-fname)))][pyflakes]] | [[elisp:(python-check (format "/bisos/pipx/bin/pychecker %s" (bx:buf-fname))))][pychecker (executes)]] | [[elisp:(python-check (format "/bisos/pipx/bin/pycodestyle %s" (bx:buf-fname))))][pycodestyle]] | [[elisp:(python-check (format "/bisos/pipx/bin/flake8 %s" (bx:buf-fname))))][flake8]] | [[elisp:(python-check (format "/bisos/pipx/bin/pylint %s" (bx:buf-fname))))][pylint]]  [[elisp:(org-cycle)][| ]]
+#+end_org """
+####+END:
+
+####+BEGIN: b:py3:cs:orgItem/basic :type "=PyImports= "  :title "*Py Library IMPORTS*" :comment "-- Framework and External Packages Imports"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  =PyImports=  [[elisp:(outline-show-subtree+toggle)][||]] *Py Library IMPORTS* -- Framework and External Packages Imports  [[elisp:(org-cycle)][| ]]
+#+end_org """
+####+END:
+
+# import os
+import collections
+# import pathlib
+# import invoke
+
+####+BEGIN: b:py3:cs:framework/imports :basedOn "classification"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CsFrmWrk   [[elisp:(outline-show-subtree+toggle)][||]] *Imports* =Based on Classification=cs-u=
+#+end_org """
+from bisos import b
+from bisos.b import cs
+from bisos.b import b_io
+from bisos.common import csParam
+
+import collections
+####+END:
+
+from pathlib import Path
+import ast
+import sys
+import tempfile
+import subprocess
+import importlib.util
+from graphviz import Digraph
+
+####+BEGIN: b:py3:cs:orgItem/basic :type "=Executes=  "  :title "CSU-Lib Executions" :comment "-- cs.invOutcomeReportControl"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  =Executes=   [[elisp:(outline-show-subtree+toggle)][||]] CSU-Lib Executions -- cs.invOutcomeReportControl  [[elisp:(org-cycle)][| ]]
+#+end_org """
+####+END:
+
+cs.invOutcomeReportControl(cmnd=True, ro=True)
+
+####+BEGIN: b:py3:cs:orgItem/section :title "Common Parameters Specification" :comment "based on cs.param.CmndParamDict -- As expected from CSU-s"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  /Section/    [[elisp:(outline-show-subtree+toggle)][||]] *Common Parameters Specification* based on cs.param.CmndParamDict -- As expected from CSU-s  [[elisp:(org-cycle)][| ]]
+#+end_org """
+####+END:
+
+####+BEGIN: b:py3:cs:func/typing :funcName "commonParamsSpecify" :comment "~CSU Specification~" :funcType "ParSpc" :deco ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-ParSpc [[elisp:(outline-show-subtree+toggle)][||]] /commonParamsSpecify/  ~CSU Specification~  [[elisp:(org-cycle)][| ]]
+#+end_org """
+def commonParamsSpecify(
+####+END:
+        csParams: cs.param.CmndParamDict,
+) -> None:
+    csParams.parDictAdd(
+        parName='csxuFpsBasePath',
+        parDescription="Path to a directory in which csxuFps can be found. Defaults to ",
+        parDataType=None,
+        parDefault="/bisos/var/csxu",
+        parChoices=[],
+        argparseShortOpt=None,
+        argparseLongOpt='--csxuFpsBasePath',
+    )
+    csParams.parDictAdd(
+        parName='csxuName',
+        parDescription=f"Name of CSXU as string. Defaults to executing CSXU",
+        parDataType=None,
+        parDefault=cs.G.icmMyName(),
+        parChoices=[],
+        argparseShortOpt=None,
+        argparseLongOpt='--csxuName',
+    )
+    csParams.parDictAdd(
+        parName='pyDictResultPath',
+        parDescription="Path to created Python Dict File.",
+        parDataType=None,
+        parDefault=f"/bisos/var/csxu/{cs.G.icmMyName()}/derived/inSchemaDict.py",
+        parChoices=[],
+        argparseShortOpt=None,
+        argparseLongOpt='--pyDictResultPath',
+    )
+    csParams.parDictAdd(
+        parName='graphvizResultPath',
+        parDescription="Path to created graphviz file",
+        parDataType=None,
+        parDefault=f"/bisos/var/csxu/{cs.G.icmMyName()}/derived/graphviz.pdf",
+        parChoices=[],
+        argparseShortOpt=None,
+        argparseLongOpt='--graphvizResultPath',
+    )
+
+
+
+####+BEGIN: blee:bxPanel:foldingSection :outLevel 0 :sep nil :title "Direct Command Services" :anchor ""  :extraInfo "Examples and CSs"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*     [[elisp:(outline-show-subtree+toggle)][| _Direct Command Services_: |]]  Examples and CSs  [[elisp:(org-shifttab)][<)]] E|
+#+end_org """
+####+END:
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "examples_csu" :comment "" :parsMand "" :parsOpt "" :argsMin 0 :argsMax 0 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<examples_csu>>  =verify= ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class examples_csu(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ ]
+    cmndArgsLen = {'Min': 0, 'Max': 0,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {}
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
+            return failed(cmndOutcome)
+####+END:
+        self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Basic example command.
+        #+end_org """)
+
+        od = collections.OrderedDict
+        cmnd = cs.examples.cmndEnter
+        literal = cs.examples.execInsert
+
+        csxuFpsBase = "/bisos/var/csxu"
+        csxuName = cs.G.icmMyName()
+        pyDictResultPath = f"/bisos/var/csxu/{csxuName}/derived/inSchemaDict.py"
+        graphvizResultPath = f"/bisos/var/csxu/{csxuName}/derived/graphviz.pdf"
+
+        csxuFpsBasePars = od([('csxuFpsBasePath', csxuFpsBase),])
+        csxuNamePars = od([('csxuName', csxuName),])
+        pyDictResultPathPars = od([('pyDictResultPath', pyDictResultPath),])
+        graphvizResultPathPars = od([('graphvizResultPath', graphvizResultPath),])
+
+        csxuAllPars = od(list(csxuFpsBasePars.items()) + list(csxuNamePars.items()) + list(pyDictResultPathPars.items()) + list(graphvizResultPathPars.items()))
+        csxuPyDictPars = od(list(csxuFpsBasePars.items()) + list(csxuNamePars.items()) + list(pyDictResultPathPars.items()))
+
+        cs.examples.menuChapter('=CSXU FPs Create=')
+
+        cmnd('csxuInSchema', args=csxuFpsBase)
+
+        cs.examples.menuChapter('=CSXU FPs to Py Dictionary and Graphviz=')
+
+        cmnd('csxuFpsToPyDict', pars=csxuPyDictPars)
+        cmnd('csxuFpsToGraphviz', pars=csxuAllPars)
+        # cmnd('csxuFpsToGraphvizShow', pars=csxuNameAndFpsBasePars)
+
+        # cs.examples.menuSection('/factNameGetattr/')
+        # literal("facter networking")
+
+        return(cmndOutcome)
+
+####+BEGIN: b:py3:cs:orgItem/section :title "Helper Functions for CSXU FPs Processing"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  /Section/    [[elisp:(outline-show-subtree+toggle)][||]] *Helper Functions for CSXU FPs Processing*   [[elisp:(org-cycle)][| ]]
+#+end_org """
+####+END:
+
+def convert_literal_string(value_str):
+    """
+    Try to convert a string to a Python literal value.
+    If the string looks like a Python literal (None, list, dict, tuple, number, boolean, etc),
+    parse it using ast.literal_eval(). Otherwise return the string as-is.
+    
+    This allows the generated dictionary to have proper typed values instead of all strings.
+    """
+    if not isinstance(value_str, str):
+        return value_str
+    
+    # Strip whitespace and newlines
+    stripped = value_str.strip()
+    
+    # Try to parse as a Python literal
+    try:
+        return ast.literal_eval(stripped)
+    except (ValueError, SyntaxError):
+        # If it's not a valid literal, return the original string
+        return value_str
+
+def walk_directory_to_dict(directory_path):
+    """Recursively walk through a directory and create a nested dictionary."""
+    result = {}
+    # Directories to skip
+    skip_dirs = {'derived', '__pycache__'}
+    
+    try:
+        dir_obj = Path(directory_path)
+        entries = sorted([p.name for p in dir_obj.iterdir()])
+    except PermissionError:
+        return result
+    
+    for entry in entries:
+        # Skip specified directories
+        if entry in skip_dirs:
+            continue
+            
+        full_path = Path(directory_path) / entry
+        if full_path.is_dir():
+            result[entry] = walk_directory_to_dict(full_path)
+        elif full_path.is_file():
+            try:
+                content = full_path.read_text(encoding='utf-8', errors='replace')
+                # Convert string literals to actual Python values
+                result[entry] = convert_literal_string(content)
+            except Exception:
+                result[entry] = None
+    return result
+
+def create_csxu_dict(csxu_base_path, csxu_name):
+    """Create a dictionary from CSXU file parameters."""
+    csxu_path = Path(csxu_base_path) / csxu_name
+    if not csxu_path.is_dir():
+        return None
+    return {csxu_name: walk_directory_to_dict(csxu_path)}
+
+def parse_list_string(list_str):
+    """
+    Parse a string representation of a list using ast.literal_eval.
+    
+    Args:
+        list_str: String representation of a list (e.g., "['cache', 'perfName']")
+        
+    Returns:
+        List of items, or empty list if parsing fails
+    """
+    try:
+        # Remove trailing newlines and whitespace
+        list_str_cleaned = list_str.strip() if isinstance(list_str, str) else str(list_str).strip()
+        # Parse the string as Python code
+        result = ast.literal_eval(list_str_cleaned)
+        return result if isinstance(result, list) else []
+    except (ValueError, SyntaxError, TypeError):
+        return []
+
+def create_graphviz_diagram(params_dict_input, csxu_name):
+    """
+    Create a Graphviz diagram from the parameters dictionary.
+    
+    Args:
+        params_dict_input: The nested parameters dictionary
+        csxu_name: Name of the CSXU to visualize
+        
+    Returns:
+        A Digraph object
+    """
+    # Create a new directed graph with left-to-right orientation
+    dot = Digraph(comment=f'{csxu_name} Command Hierarchy', format='pdf')
+    dot.attr(rankdir='LR')  # Left to right
+    dot.attr('node', shape='box', style='rounded,filled')
+    
+    # Color scheme for different levels
+    colors = {
+        'csxu': '#FF6B6B',          # Red for csxu (root)
+        'command': '#4ECDC4',       # Teal for commands
+        'param_mandatory': '#95E1D3',  # Light green for mandatory params
+        'param_optional': '#FFF9C4',   # Light yellow for optional params
+        'enum': '#B0BEC5'           # Blue-gray for enum values
+    }
+    
+    # Process each csxu (directory in params_dict)
+    for current_csxu_name, csxu_data in params_dict_input.items():
+        if not isinstance(csxu_data, dict):
+            continue
+            
+        # Create csxu node
+        csxu_node_id = f"csxu_{current_csxu_name}"
+        dot.node(csxu_node_id, label=current_csxu_name, color=colors['csxu'], fontcolor='white')
+        
+        # Get commands from inSchema/csxuCmndsFp
+        if 'inSchema' in csxu_data and 'csxuCmndsFp' in csxu_data['inSchema']:
+            commands = csxu_data['inSchema']['csxuCmndsFp']
+            params_fp = csxu_data['inSchema'].get('paramsFp', {})
+            
+            # Process each command
+            for cmd_name, cmd_data in commands.items():
+                if not isinstance(cmd_data, dict):
+                    continue
+                
+                # Create command node
+                cmd_node_id = f"cmd_{current_csxu_name}_{cmd_name}"
+                dot.node(cmd_node_id, label=cmd_name, color=colors['command'], fontcolor='white')
+                dot.edge(csxu_node_id, cmd_node_id)
+                
+                # Parse mandatory and optional parameters
+                params_mandatory_str = cmd_data.get('paramsMandatory', '[]')
+                params_optional_str = cmd_data.get('paramsOptional', '[]')
+                
+                params_mandatory = parse_list_string(params_mandatory_str)
+                params_optional = parse_list_string(params_optional_str)
+                
+                # Process mandatory parameters
+                for param_name in params_mandatory:
+                    param_node_id = f"param_{current_csxu_name}_{cmd_name}_{param_name}_m"
+                    param_label = f"{param_name}\n(mandatory)"
+                    dot.node(param_node_id, label=param_label, 
+                            color=colors['param_mandatory'], fontcolor='black')
+                    dot.edge(cmd_node_id, param_node_id)
+                    
+                    # Add enum values if they exist
+                    if param_name in params_fp and isinstance(params_fp[param_name], dict):
+                        enums = params_fp[param_name].get('enums', {})
+                        if enums:
+                            for enum_val in sorted(enums.keys()):
+                                enum_node_id = f"enum_{current_csxu_name}_{cmd_name}_{param_name}_{enum_val}"
+                                dot.node(enum_node_id, label=enum_val, 
+                                        color=colors['enum'], fontcolor='white')
+                                dot.edge(param_node_id, enum_node_id)
+                
+                # Process optional parameters
+                for param_name in params_optional:
+                    param_node_id = f"param_{current_csxu_name}_{cmd_name}_{param_name}_o"
+                    param_label = f"{param_name}\n(optional)"
+                    dot.node(param_node_id, label=param_label, 
+                            color=colors['param_optional'], fontcolor='black')
+                    dot.edge(cmd_node_id, param_node_id)
+                    
+                    # Add enum values if they exist
+                    if param_name in params_fp and isinstance(params_fp[param_name], dict):
+                        enums = params_fp[param_name].get('enums', {})
+                        if enums:
+                            for enum_val in sorted(enums.keys()):
+                                enum_node_id = f"enum_{current_csxu_name}_{cmd_name}_{param_name}_{enum_val}"
+                                dot.node(enum_node_id, label=enum_val, 
+                                        color=colors['enum'], fontcolor='white')
+                                dot.edge(param_node_id, enum_node_id)
+    
+    return dot
+
+def load_params_dict_from_file(pydict_file_path):
+    """
+    Load the parameters dictionary from a Python dictionary file.
+    
+    Args:
+        pydict_file_path: Path to the Python file containing params_dict
+        
+    Returns:
+        The params_dict from the file
+    """
+    try:
+        # Read and execute the Python file to load params_dict
+        pydict_path = Path(pydict_file_path)
+        if not pydict_path.exists():
+            raise FileNotFoundError(f"Dictionary file not found: {pydict_file_path}")
+        
+        # Use importlib to load the module
+        spec = importlib.util.spec_from_file_location(
+            "params_dict_module",
+            str(pydict_path)
+        )
+        if spec is None or spec.loader is None:
+            raise RuntimeError("Could not create module spec")
+            
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        
+        if not hasattr(module, 'params_dict'):
+            raise AttributeError("params_dict not found in the loaded module")
+        
+        return module.params_dict
+    except Exception as e:
+        raise RuntimeError(f"Error loading params dictionary from {pydict_file_path}: {e}")
+
+def write_dict_to_file(output_dict, output_path):
+    """Write dictionary to file formatted with black."""
+    try:
+        unformatted_content = (
+            "# Auto-generated dictionary from csxuFpsToPyDict\n"
+            "# This file contains file-based parameters organized in a nested dictionary structure\n\n"
+            "params_dict = " + repr(output_dict) + "\n"
+        )
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as tmp:
+            tmp.write(unformatted_content)
+            tmp_path = tmp.name
+        
+        try:
+            subprocess.run(['black', tmp_path], check=True, capture_output=True)
+            tmp_file = Path(tmp_path)
+            formatted_content = tmp_file.read_text(encoding='utf-8')
+            
+            output_file = Path(output_path)
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            output_file.write_text(formatted_content, encoding='utf-8')
+            return True
+        finally:
+            tmp_file = Path(tmp_path)
+            if tmp_file.exists():
+                tmp_file.unlink()
+    except Exception as e:
+        print(f"Error writing to {output_path}: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
+        return False
+
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "csxuFpsToPyDict" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "csxuFpsBasePath csxuName pyDictResultPath" :argsMin 0 :argsMax 0 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<csxuFpsToPyDict>>  =verify= parsOpt=csxuFpsBasePath csxuName pyDictResultPath ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class csxuFpsToPyDict(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ 'csxuFpsBasePath', 'csxuName', 'pyDictResultPath', ]
+    cmndArgsLen = {'Min': 0, 'Max': 0,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+             csxuFpsBasePath: typing.Optional[str]=None,  # Cs Optional Param
+             csxuName: typing.Optional[str]=None,  # Cs Optional Param
+             pyDictResultPath: typing.Optional[str]=None,  # Cs Optional Param
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {'csxuFpsBasePath': csxuFpsBasePath, 'csxuName': csxuName, 'pyDictResultPath': pyDictResultPath, }
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
+            return failed(cmndOutcome)
+        csxuFpsBasePath = csParam.mappedValue('csxuFpsBasePath', csxuFpsBasePath)
+        csxuName = csParam.mappedValue('csxuName', csxuName)
+        pyDictResultPath = csParam.mappedValue('pyDictResultPath', pyDictResultPath)
+####+END:
+
+        self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Convert CSXU file parameters to Python dictionary.
+        #+end_org """)
+
+        # Build the CSXU directory path
+        csxu_path = Path(csxuFpsBasePath) / csxuName
+        
+        # Create the dictionary from CSXU FPs
+        output_dict = create_csxu_dict(csxuFpsBasePath, csxuName)
+        
+        if output_dict is None:
+            return b_io.eh.badOutcome(cmndOutcome, f"Failed to process CSXU at {csxu_path}")
+        
+        # Write to file
+        if write_dict_to_file(output_dict, pyDictResultPath):
+            pass  # Success - continue to return cmndOutcome below
+        else:
+            return b_io.eh.badOutcome(cmndOutcome, f"Failed to write to {pyDictResultPath}")
+
+        return cmndOutcome.set(
+            opError=b.OpError.Success,
+            opResults=pyDictResultPath,
+        )
+
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "csxuFpsToGraphviz" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "csxuFpsBasePath csxuName pyDictResultPath graphvizResultPath" :argsMin 0 :argsMax 0 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<csxuFpsToGraphviz>>  =verify= parsOpt=csxuFpsBasePath csxuName pyDictResultPath graphvizResultPath ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class csxuFpsToGraphviz(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ 'csxuFpsBasePath', 'csxuName', 'pyDictResultPath', 'graphvizResultPath', ]
+    cmndArgsLen = {'Min': 0, 'Max': 0,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+             csxuFpsBasePath: typing.Optional[str]=None,  # Cs Optional Param
+             csxuName: typing.Optional[str]=None,  # Cs Optional Param
+             pyDictResultPath: typing.Optional[str]=None,  # Cs Optional Param
+             graphvizResultPath: typing.Optional[str]=None,  # Cs Optional Param
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {'csxuFpsBasePath': csxuFpsBasePath, 'csxuName': csxuName, 'pyDictResultPath': pyDictResultPath, 'graphvizResultPath': graphvizResultPath, }
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
+            return failed(cmndOutcome)
+        csxuFpsBasePath = csParam.mappedValue('csxuFpsBasePath', csxuFpsBasePath)
+        csxuName = csParam.mappedValue('csxuName', csxuName)
+        pyDictResultPath = csParam.mappedValue('pyDictResultPath', pyDictResultPath)
+        graphvizResultPath = csParam.mappedValue('graphvizResultPath', graphvizResultPath)
+####+END:
+
+        self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Generate Graphviz diagram from CSXU parameters dictionary.
+        #+end_org """)
+
+        try:
+            # Load the parameters dictionary from the file created by csxuFpsToPyDict
+            if not pyDictResultPath:
+                return b_io.eh.badOutcome(cmndOutcome, "pyDictResultPath is required")
+            
+            params_dict = load_params_dict_from_file(pyDictResultPath)
+            
+            if not params_dict:
+                return b_io.eh.badOutcome(cmndOutcome, "Failed to load parameters dictionary")
+            
+            # Verify the CSXU exists in the dictionary
+            if csxuName not in params_dict:
+                available = list(params_dict.keys())
+                return b_io.eh.badOutcome(cmndOutcome, f"CSXU '{csxuName}' not found. Available: {available}")
+            
+            # Create filtered dictionary containing only the requested CSXU
+            filtered_dict = {csxuName: params_dict[csxuName]}
+            
+            # Generate the Graphviz diagram
+            dot = create_graphviz_diagram(filtered_dict, csxuName)
+            
+            # Save the diagram to file
+            output_path_obj = Path(graphvizResultPath)
+            output_dir = output_path_obj.parent
+            output_base = output_path_obj.stem  # Filename without extension
+            
+            # Create output directory if needed
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Render the diagram (format='pdf' is already set in the Digraph)
+            output_file = str(output_dir / output_base)
+            dot.render(output_file, cleanup=True)
+            
+            # Verify the PDF was created
+            pdf_file = Path(f"{output_file}.pdf")
+            if not pdf_file.exists():
+                return b_io.eh.badOutcome(cmndOutcome, f"Failed to create PDF file at {pdf_file}")
+
+            return cmndOutcome.set(
+                opError=b.OpError.Success,
+                opResults=output_path_obj,
+            )
+
+        except FileNotFoundError as e:
+            return b_io.eh.badOutcome(cmndOutcome, f"File not found: {e}")
+        except Exception as e:
+            return b_io.eh.badOutcome(cmndOutcome, f"Error generating Graphviz diagram: {e}")
+
+
+
+
+
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "csxuInSchema" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 1 :argsMax 1 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<csxuInSchema>>  =verify= argsMin=1 argsMax=1 ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class csxuInSchema(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ ]
+    cmndArgsLen = {'Min': 1, 'Max': 1,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+             argsList: typing.Optional[list[str]]=None,  # CsArgs
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {}
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
+            return failed(cmndOutcome)
+        cmndArgsSpecDict = self.cmndArgsSpec()
+####+END:
+
+        self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Given a baseDir, update icmIn. Part of icm framework.
+        #+end_org """)
+
+        self.captureRunStr(""" #+begin_org
+*** Run Results
+#+begin_src sh :results output :session shared
+player.cs --upload=../../bin/facterModuleSample.py  -i clusterRun localhost otherHost
+  #+end_src
+#+RESULTS:
+
+        #+end_org """)
+
+        cmndArg = self.cmndArgsGet("0", cmndArgsSpecDict, argsList)
+        if not cmndArg: failed(cmndOutcome, f"Missing Mandatory Argument -- Expected one argument")
+
+        csxuFpsBasePath = cmndArg
+
+        # Ensure csxuFpsBasePath exists, create if necessary
+        base_path = Path(csxuFpsBasePath)
+        if not base_path.exists():
+            try:
+                base_path.mkdir(parents=True, exist_ok=True)
+            except Exception as e:
+                return b_io.eh.badOutcome(cmndOutcome, f"Failed to create directory {csxuFpsBasePath}: {e}")
+
+        csxuName = cs.G.icmMyName()
+
+        # Build the CSXU directory path
+        csxu_path = Path(csxuFpsBasePath) / Path(csxuName)
+
+        csxuInBase = csxu_path  / Path("inSchema")
+
+        #print("{csxuInBase}".format(csxuInBase=csxuInBase))
+
+        cs.param.csParamsToFileParamsUpdate(
+            parRoot=f"{csxuInBase}/paramsFp",
+            csParams=cs.G.icmParamDictGet(),
+        )
+
+        # cs.param.csParamsToFileParamsUpdate(
+        #     parRoot=f"{csxuInBase}/commonParamsFp",
+        #     csParams=cs.param.commonCsParamsPrep(),
+        # )
+
+        cs.csmuCmndsToFileParamsUpdate(
+            parRoot=f"{csxuInBase}/csxuCmndsFp",
+        )
+
+        # cs.cmndMainsMethodsToFileParamsUpdate(
+        #     parRoot=f"{csxuInBase}/cmndMainsFp",
+        # )
+
+        # cs.cmndLibsMethodsToFileParamsUpdate(
+        #     parRoot=f"{csxuInBase}/cmndLibsFp",
+        # )
+
+        return cmndOutcome.set(
+            opError=b.OpError.Success,
+            opResults=csxuInBase,
+        )
+
+####+BEGIN: b:py3:cs:method/args :methodName "cmndArgsSpec" :methodType "anyOrNone" :retType "bool" :deco "default" :argsList "self"
+    """ #+begin_org
+**  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  Mtd-T-anyOrNone [[elisp:(outline-show-subtree+toggle)][||]] /cmndArgsSpec/ deco=default  deco=default  [[elisp:(org-cycle)][| ]]
+    #+end_org """
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmndArgsSpec(self, ):
+####+END:
+        """
+***** Cmnd Args Specification
+"""
+        cmndArgsSpecDict = cs.CmndArgsSpecDict()
+
+        cmndArgsSpecDict.argsDictAdd(
+            argPosition="0",
+            argName="cmndArg",
+            argDefault=None,
+            argChoices=[],
+            argDescription="Base in which inSchema File Parameters are created"
+        )
+
+        return cmndArgsSpecDict
+
+####+BEGIN: b:py3:cs:framework/endOfFile :basedOn "classification"
+""" #+begin_org
+* [[elisp:(org-cycle)][| *End-Of-Editable-Text* |]] :: emacs and org variables and control parameters
+#+end_org """
+
+#+STARTUP: showall
+
+### local variables:
+### no-byte-compile: t
+### end:
+####+END:

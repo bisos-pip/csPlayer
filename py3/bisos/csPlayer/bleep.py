@@ -12,7 +12,7 @@
 (put 'b:dblockControls 'py3:cs:Classification "cs-u") ; one of cs-mu, cs-u, cs-lib, b-lib, pyLibPure
 #+END_SRC
 #+RESULTS:
-: cs-mu
+: cs-u
 #+end_org """
 ####+END:
 
@@ -76,12 +76,13 @@ Module description comes here.
 
 ####+BEGIN: b:py3:cs:framework/imports :basedOn "classification"
 """ #+begin_org
-** Imports Based On Classification=cs-lib
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CsFrmWrk   [[elisp:(outline-show-subtree+toggle)][||]] *Imports* =Based on Classification=cs-u=
 #+end_org """
 from bisos import b
 from bisos.b import cs
 from bisos.b import b_io
 
+import collections
 ####+END:
 
 import os
@@ -126,11 +127,20 @@ def commonParamsSpecify(
 #+end_org """
 def examples_csBasic():
 ####+END:
+    """NOTYET, bleepMenu does not exist and bleep is not functional. This is just a placeholder."""
     def cpsInit(): return collections.OrderedDict()
     def menuItem(): cs.examples.cmndInsert(cmndName, cps, cmndArgs, verbosity='little')
     #def execLineEx(cmndStr): cs.examples.execInsert(execLine=cmndStr)
 
-    cs.examples.menuChapter('*Blee Command Services Player (Update, Start, StartUpdated)*')
+    # cmndName = "bleepMenu"
+    # cps = cpsInit(); cmndArgs = ""; menuItem()
+
+    # return
+
+    cs.examples.menuChapter('*Command Services Player (Update, Start, StartUpdated)*')
+
+    cmndName = "csmuInSchema"
+    cps = cpsInit(); cmndArgs = "./var"; menuItem()
 
     cmndName = "bleepUpdate"
     cps = cpsInit(); cmndArgs = ""; menuItem()
@@ -169,7 +179,7 @@ def panelBasePathObtain(
         #return "/bisos/var/core/bleePlayer"
         return ( os.path.join(
             # bxpBaseDir.bpbBisos_baseObtain_var(None),  # bxpBaseDir has not been converted to b.cs yet.
-            "/tmp"
+            "/tmp/"
             "main/bleePlayer"
         ))
     
@@ -225,7 +235,7 @@ class bleepUpdate(cs.Cmnd):
         )
         # icm.unusedSuppress(icmPlayerInfoBaseDir)
 
-        icmInputsExpose().cmnd(
+        cs.inCmnd.csmuInSchema().cmnd(
             rtInv=rtInv,
             cmndOutcome=cmndOutcome,
             argsList=[
@@ -363,56 +373,6 @@ class bleepPlayUpdated(cs.Cmnd):
 *  [[elisp:(beginning-of-buffer)][Top]] ############## [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(delete-other-windows)][(1)]]    *Subject ICM Information Exposition*  [[elisp:(org-cycle)][| ]]  [[elisp:(org-show-subtree)][|=]]
 """
 ####+END:
-
-####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "icmInputsExpose" :comment "" :parsMand "" :parsOpt "" :argsMin 1 :argsMax 1 :pyInv ""
-""" #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<icmInputsExpose>>  =verify= argsMin=1 argsMax=1 ro=cli   [[elisp:(org-cycle)][| ]]
-#+end_org """
-class icmInputsExpose(cs.Cmnd):
-    cmndParamsMandatory = [ ]
-    cmndParamsOptional = [ ]
-    cmndArgsLen = {'Min': 1, 'Max': 1,}
-
-    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
-    def cmnd(self,
-             rtInv: cs.RtInvoker,
-             cmndOutcome: b.op.Outcome,
-             argsList: typing.Optional[list[str]]=None,  # CsArgs
-    ) -> b.op.Outcome:
-
-        callParamsDict = {}
-        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
-            return b_io.eh.badOutcome(cmndOutcome)
-        cmndArgsSpecDict = self.cmndArgsSpec()
-####+END:
-        icmsBase = argsList[0]
-
-        G_myFullName = sys.argv[0]
-        G_myName = os.path.basename(G_myFullName)
-
-        icmInBase = icmsBase + "/" + G_myName + "/icmIn"
-        
-        print("{icmInBase}".format(icmInBase=icmInBase))
-            
-        b.fp.csParamsToFileParamsUpdate(
-            parRoot="{icmInBase}/paramsFp".format(icmInBase=icmInBase),
-            csParams=G.icmParamDictGet(),
-        )
-
-        icm.csParamsToFileParamsUpdate(
-            parRoot="{icmInBase}/commonParamsFp".format(icmInBase=icmInBase),
-            csParams=icm.commonIcmParamsPrep(),
-        )
-
-        icm.cmndMainsMethodsToFileParamsUpdate(
-            parRoot="{icmInBase}/cmndMainsFp".format(icmInBase=icmInBase),
-        )
-
-        icm.cmndLibsMethodsToFileParamsUpdate(
-            parRoot="{icmInBase}/cmndLibsFp".format(icmInBase=icmInBase),
-        )
-        
-        return
 
 
 
