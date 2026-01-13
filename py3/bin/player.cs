@@ -181,6 +181,7 @@ class examples(cs.Cmnd):
         cs.examples.commonBrief()
 
         csxuFpsTo.examples_csu().pyCmnd()
+        csxuFpsTo.playerMenuExamples().pyCmnd()
 
         return(cmndOutcome)
 
