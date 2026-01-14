@@ -127,9 +127,9 @@ def commonParamsSpecify(
 ) -> None:
     csParams.parDictAdd(
         parName='csxuFpsBasePath',
-        parDescription="Path to a directory in which csxuFps can be found. Defaults to ",
+        parDescription="Path to a directory in which csxuFps can be found. Defaults to /bisos/var/csxu",
         parDataType=None,
-        parDefault="/bisos/var/csxu",
+        parDefault="z",
         parChoices=[],
         argparseShortOpt=None,
         argparseLongOpt='--csxuFpsBasePath',
@@ -144,10 +144,19 @@ def commonParamsSpecify(
         argparseLongOpt='--csxuName',
     )
     csParams.parDictAdd(
+        parName='csxuDerivedBasePath',
+        parDescription=f"Path to a directory in which csxu derived files can be found. Defaults to /bisos/var/csxu/{cs.G.icmMyName()}",
+        parDataType=None,
+        parDefault=f"/bisos/var/csxu/{cs.G.icmMyName()}/derived",
+        parChoices=[],
+        argparseShortOpt=None,
+        argparseLongOpt='--csxuDerivedBasePath',
+    )
+    csParams.parDictAdd(
         parName='pyDictResultPath',
         parDescription="Path to created Python Dict File.",
         parDataType=None,
-        parDefault=f"/bisos/var/csxu/{cs.G.icmMyName()}/derived/inSchemaDict.py",
+        parDefault=f"inSchemaDict.py",
         parChoices=[],
         argparseShortOpt=None,
         argparseLongOpt='--pyDictResultPath',
@@ -156,11 +165,21 @@ def commonParamsSpecify(
         parName='graphvizResultPath',
         parDescription="Path to created graphviz file",
         parDataType=None,
-        parDefault=f"/bisos/var/csxu/{cs.G.icmMyName()}/derived/graphviz.pdf",
+        parDefault=f"graphviz.pdf",
         parChoices=[],
         argparseShortOpt=None,
         argparseLongOpt='--graphvizResultPath',
     )
+    csParams.parDictAdd(
+        parName='cliCompgenResultPath',
+        parDescription="Path to created graphviz file",
+        parDataType=None,
+        parDefault=f"cliCompgen.sh",
+        parChoices=[],
+        argparseShortOpt=None,
+        argparseLongOpt='--cliCompgenResultPath',
+    )
+
 
 
 ####+BEGIN: blee:bxPanel:foldingSection :outLevel 0 :sep nil :title "Direct Command Services" :anchor ""  :extraInfo "Examples and CSs"
@@ -199,15 +218,26 @@ class examples_csu(cs.Cmnd):
 
         csxuFpsBase = "/bisos/var/csxu"
         csxuName = cs.G.icmMyName()
-        pyDictResultPath = f"/bisos/var/csxu/{csxuName}/derived/inSchemaDict.py"
-        graphvizResultPath = f"/bisos/var/csxu/{csxuName}/derived/graphviz.pdf"
+        csxuDerivedBase = f"/bisos/var/csxu/{csxuName}/derived"
+
+        pyDictResultPath = f"inSchemaDict.py"
+        graphvizResultPath = f"graphviz.pdf"
+        cliCompgenResultPath = f"cliCompgen.sh"
+
+        #pyDictResultPath = f"/bisos/var/csxu/{csxuName}/derived/inSchemaDict.py"
+        #graphvizResultPath = f"/bisos/var/csxu/{csxuName}/derived/graphviz.pdf"
 
         csxuFpsBasePars = od([('csxuFpsBasePath', csxuFpsBase),])
         csxuNamePars = od([('csxuName', csxuName),])
+        csxuDerivedBasePars = od([('csxuDerivedBasePath', csxuDerivedBase),])   
+
         pyDictResultPathPars = od([('pyDictResultPath', pyDictResultPath),])
         graphvizResultPathPars = od([('graphvizResultPath', graphvizResultPath),])
+        cliCompgenResultPathPars = od([('cliCompgenResultPath', cliCompgenResultPath),])    
 
-        csxuAllPars = od(list(csxuFpsBasePars.items()) + list(csxuNamePars.items()) + list(pyDictResultPathPars.items()) + list(graphvizResultPathPars.items()))
+        # csxuAllPars = od(list(csxuFpsBasePars.items()) + list(csxuNamePars.items()) + list(pyDictResultPathPars.items()) + list(graphvizResultPathPars.items()))
+        csxuAllPars = od(list(csxuFpsBasePars.items()) + list(csxuNamePars.items()) + list(csxuDerivedBasePars.items()))
+
         csxuPyDictPars = od(list(csxuFpsBasePars.items()) + list(csxuNamePars.items()) + list(pyDictResultPathPars.items()))
 
         cs.examples.menuChapter('=CSXU FPs Create=')
@@ -216,8 +246,10 @@ class examples_csu(cs.Cmnd):
 
         cs.examples.menuChapter('=CSXU FPs to Py Dictionary and Graphviz=')
 
-        cmnd('csxuFpsToPyDict', pars=csxuPyDictPars)
+        #cmnd('csxuFpsToPyDict', pars=csxuPyDictPars)
+        cmnd('csxuFpsToPyDict', pars=csxuAllPars)
         cmnd('csxuFpsToGraphviz', pars=csxuAllPars)
+        cmnd('csxuFpsToCliCompgen', pars=csxuAllPars)
         # cmnd('csxuFpsToGraphvizShow', pars=csxuNameAndFpsBasePars)
 
         # cs.examples.menuSection('/factNameGetattr/')
@@ -535,7 +567,7 @@ def write_dict_to_file(output_dict, output_path):
 #+end_org """
 class csxuFpsToPyDict(cs.Cmnd):
     cmndParamsMandatory = [ ]
-    cmndParamsOptional = [ 'csxuFpsBasePath', 'csxuName', 'pyDictResultPath', ]
+    cmndParamsOptional = [ 'csxuFpsBasePath', 'csxuName', 'csxuDerivedBasePath', 'pyDictResultPath', ]
     cmndArgsLen = {'Min': 0, 'Max': 0,}
 
     @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
@@ -544,15 +576,17 @@ class csxuFpsToPyDict(cs.Cmnd):
              cmndOutcome: b.op.Outcome,
              csxuFpsBasePath: typing.Optional[str]=None,  # Cs Optional Param
              csxuName: typing.Optional[str]=None,  # Cs Optional Param
+             csxuDerivedBasePath: typing.Optional[str]=None,  # Cs Optional Param
              pyDictResultPath: typing.Optional[str]=None,  # Cs Optional Param
     ) -> b.op.Outcome:
 
         failed = b_io.eh.badOutcome
-        callParamsDict = {'csxuFpsBasePath': csxuFpsBasePath, 'csxuName': csxuName, 'pyDictResultPath': pyDictResultPath, }
+        callParamsDict = {'csxuFpsBasePath': csxuFpsBasePath, 'csxuName': csxuName, 'csxuDerivedBasePath': csxuDerivedBasePath, 'pyDictResultPath': pyDictResultPath, }
         if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
             return failed(cmndOutcome)
         csxuFpsBasePath = csParam.mappedValue('csxuFpsBasePath', csxuFpsBasePath)
         csxuName = csParam.mappedValue('csxuName', csxuName)
+        csxuDerivedBasePath = csParam.mappedValue('csxuDerivedBasePath', csxuDerivedBasePath)
         pyDictResultPath = csParam.mappedValue('pyDictResultPath', pyDictResultPath)
 ####+END:
 
@@ -570,24 +604,29 @@ class csxuFpsToPyDict(cs.Cmnd):
             return b_io.eh.badOutcome(cmndOutcome, f"Failed to process CSXU at {csxu_path}")
         
         # Write to file
-        if write_dict_to_file(output_dict, pyDictResultPath):
+        # Resolve path: if relative, prepend csxuDerivedBasePath
+        output_path = Path(pyDictResultPath)
+        if not output_path.is_absolute():
+            output_path = Path(csxuDerivedBasePath) / output_path
+        
+        if write_dict_to_file(output_dict, str(output_path)):
             pass  # Success - continue to return cmndOutcome below
         else:
-            return b_io.eh.badOutcome(cmndOutcome, f"Failed to write to {pyDictResultPath}")
+            return b_io.eh.badOutcome(cmndOutcome, f"Failed to write to {output_path}")
 
         return cmndOutcome.set(
             opError=b.OpError.Success,
-            opResults=pyDictResultPath,
+            opResults=str(output_path),
         )
 
 
-####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "csxuFpsToGraphviz" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "csxuFpsBasePath csxuName pyDictResultPath graphvizResultPath" :argsMin 0 :argsMax 0 :pyInv ""
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "csxuFpsToGraphviz" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "csxuFpsBasePath csxuName csxuDerivedBasePath pyDictResultPath  graphvizResultPath" :argsMin 0 :argsMax 0 :pyInv ""
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<csxuFpsToGraphviz>>  =verify= parsOpt=csxuFpsBasePath csxuName pyDictResultPath graphvizResultPath ro=cli   [[elisp:(org-cycle)][| ]]
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<csxuFpsToGraphviz>>  =verify= parsOpt=csxuFpsBasePath csxuName csxuDerivedBasePath pyDictResultPath  graphvizResultPath ro=cli   [[elisp:(org-cycle)][| ]]
 #+end_org """
 class csxuFpsToGraphviz(cs.Cmnd):
     cmndParamsMandatory = [ ]
-    cmndParamsOptional = [ 'csxuFpsBasePath', 'csxuName', 'pyDictResultPath', 'graphvizResultPath', ]
+    cmndParamsOptional = [ 'csxuFpsBasePath', 'csxuName', 'csxuDerivedBasePath', 'pyDictResultPath', 'graphvizResultPath', ]
     cmndArgsLen = {'Min': 0, 'Max': 0,}
 
     @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
@@ -596,16 +635,18 @@ class csxuFpsToGraphviz(cs.Cmnd):
              cmndOutcome: b.op.Outcome,
              csxuFpsBasePath: typing.Optional[str]=None,  # Cs Optional Param
              csxuName: typing.Optional[str]=None,  # Cs Optional Param
+             csxuDerivedBasePath: typing.Optional[str]=None,  # Cs Optional Param
              pyDictResultPath: typing.Optional[str]=None,  # Cs Optional Param
              graphvizResultPath: typing.Optional[str]=None,  # Cs Optional Param
     ) -> b.op.Outcome:
 
         failed = b_io.eh.badOutcome
-        callParamsDict = {'csxuFpsBasePath': csxuFpsBasePath, 'csxuName': csxuName, 'pyDictResultPath': pyDictResultPath, 'graphvizResultPath': graphvizResultPath, }
+        callParamsDict = {'csxuFpsBasePath': csxuFpsBasePath, 'csxuName': csxuName, 'csxuDerivedBasePath': csxuDerivedBasePath, 'pyDictResultPath': pyDictResultPath, 'graphvizResultPath': graphvizResultPath, }
         if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
             return failed(cmndOutcome)
         csxuFpsBasePath = csParam.mappedValue('csxuFpsBasePath', csxuFpsBasePath)
         csxuName = csParam.mappedValue('csxuName', csxuName)
+        csxuDerivedBasePath = csParam.mappedValue('csxuDerivedBasePath', csxuDerivedBasePath)
         pyDictResultPath = csParam.mappedValue('pyDictResultPath', pyDictResultPath)
         graphvizResultPath = csParam.mappedValue('graphvizResultPath', graphvizResultPath)
 ####+END:
@@ -614,12 +655,19 @@ class csxuFpsToGraphviz(cs.Cmnd):
 ** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Generate Graphviz diagram from CSXU parameters dictionary.
         #+end_org """)
 
+        
+
         try:
             # Load the parameters dictionary from the file created by csxuFpsToPyDict
             if not pyDictResultPath:
                 return b_io.eh.badOutcome(cmndOutcome, "pyDictResultPath is required")
             
-            params_dict = load_params_dict_from_file(pyDictResultPath)
+            # Resolve path: if relative, prepend csxuDerivedBasePath
+            pydict_path = Path(pyDictResultPath)
+            if not pydict_path.is_absolute():
+                pydict_path = Path(csxuDerivedBasePath) / pydict_path
+            
+            params_dict = load_params_dict_from_file(str(pydict_path))
             
             if not params_dict:
                 return b_io.eh.badOutcome(cmndOutcome, "Failed to load parameters dictionary")
@@ -636,7 +684,11 @@ class csxuFpsToGraphviz(cs.Cmnd):
             dot = create_graphviz_diagram(filtered_dict, csxuName)
             
             # Save the diagram to file
+            # Resolve path: if relative, prepend csxuDerivedBasePath
             output_path_obj = Path(graphvizResultPath)
+            if not output_path_obj.is_absolute():
+                output_path_obj = Path(csxuDerivedBasePath) / output_path_obj
+            
             output_dir = output_path_obj.parent
             output_base = output_path_obj.stem  # Filename without extension
             
@@ -646,7 +698,6 @@ class csxuFpsToGraphviz(cs.Cmnd):
             # Render the diagram (format='pdf' is already set in the Digraph)
             output_file = str(output_dir / output_base)
             dot.render(output_file, cleanup=True)
-            
             # Verify the PDF was created
             pdf_file = Path(f"{output_file}.pdf")
             if not pdf_file.exists():
@@ -663,7 +714,213 @@ class csxuFpsToGraphviz(cs.Cmnd):
             return b_io.eh.badOutcome(cmndOutcome, f"Error generating Graphviz diagram: {e}")
 
 
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "csxuFpsToCliCompgen" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "csxuFpsBasePath csxuName csxuDerivedBasePath cliCompgenResultPath" :argsMin 0 :argsMax 0 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<csxuFpsToCliCompgen>>  =verify= parsOpt=csxuFpsBasePath csxuName csxuDerivedBasePath cliCompgenResultPath ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class csxuFpsToCliCompgen(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ 'csxuFpsBasePath', 'csxuName', 'csxuDerivedBasePath', 'pyDictResultPath', 'cliCompgenResultPath', ]
+    cmndArgsLen = {'Min': 0, 'Max': 0,}
 
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+             csxuFpsBasePath: typing.Optional[str]=None,  # Cs Optional Param
+             csxuName: typing.Optional[str]=None,  # Cs Optional Param
+             csxuDerivedBasePath: typing.Optional[str]=None,  # Cs Optional Param
+             pyDictResultPath: typing.Optional[str]=None,  # Cs Optional Param
+             cliCompgenResultPath: typing.Optional[str]=None,  # Cs Optional Param
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {'csxuFpsBasePath': csxuFpsBasePath, 'csxuName': csxuName, 'csxuDerivedBasePath': csxuDerivedBasePath, 'pyDictResultPath': pyDictResultPath, 'cliCompgenResultPath': cliCompgenResultPath, }
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
+            return failed(cmndOutcome)
+        csxuFpsBasePath = csParam.mappedValue('csxuFpsBasePath', csxuFpsBasePath)
+        csxuName = csParam.mappedValue('csxuName', csxuName)
+        csxuDerivedBasePath = csParam.mappedValue('csxuDerivedBasePath', csxuDerivedBasePath)
+        pyDictResultPath = csParam.mappedValue('pyDictResultPath', pyDictResultPath)
+        cliCompgenResultPath = csParam.mappedValue('cliCompgenResultPath', cliCompgenResultPath)
+####+END:
+
+        self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Create cliCompgenResultPath
+        #+end_org """)
+
+        try:
+            # Load the parameters dictionary from the file created by csxuFpsToPyDict
+            if not pyDictResultPath:
+                return b_io.eh.badOutcome(cmndOutcome, "pyDictResultPath is required")
+            
+            # Resolve path: if relative, prepend csxuDerivedBasePath
+            pydict_path = Path(pyDictResultPath)
+            if not pydict_path.is_absolute():
+                pydict_path = Path(csxuDerivedBasePath) / pydict_path
+            
+            if not pydict_path.exists():
+                return b_io.eh.badOutcome(cmndOutcome, f"Dictionary file not found: {pydict_path}")
+            
+            params_dict = load_params_dict_from_file(str(pydict_path))
+            
+            if not params_dict:
+                return b_io.eh.badOutcome(cmndOutcome, "Failed to load parameters dictionary")
+            
+            # Verify the CSXU exists in the dictionary
+            if csxuName not in params_dict:
+                available = list(params_dict.keys())
+                return b_io.eh.badOutcome(cmndOutcome, f"CSXU '{csxuName}' not found. Available: {available}")
+            
+            # Extract commands and parameters from the dictionary
+            csxu_data = params_dict[csxuName]
+            if 'inSchema' not in csxu_data or 'csxuCmndsFp' not in csxu_data['inSchema']:
+                return b_io.eh.badOutcome(cmndOutcome, "Invalid dictionary structure: missing inSchema/csxuCmndsFp")
+            
+            commands = csxu_data['inSchema']['csxuCmndsFp']
+            params_fp = csxu_data['inSchema'].get('paramsFp', {})
+            
+            # Generate bash completion script
+            bash_script = generate_bash_completion(csxuName, commands, params_fp)
+            
+            # Write to file
+            # Resolve path: if relative, prepend csxuDerivedBasePath
+            output_file = Path(cliCompgenResultPath)
+            if not output_file.is_absolute():
+                output_file = Path(csxuDerivedBasePath) / output_file
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            output_file.write_text(bash_script, encoding='utf-8')
+            
+            return cmndOutcome.set(
+                opError=b.OpError.Success,
+                opResults=str(output_file),
+            )
+            
+        except Exception as e:
+            return b_io.eh.badOutcome(cmndOutcome, f"Error generating bash completion: {e}")
+
+
+def generate_bash_completion(csxu_name, commands, params_fp):
+    """
+    Generate a bash completion script from commands and parameters.
+    
+    Args:
+        csxu_name: Name of the CSXU
+        commands: Dictionary of commands from csxuCmndsFp
+        params_fp: Dictionary of parameter definitions from paramsFp
+        
+    Returns:
+        Bash script as a string
+    """
+    script_lines = [
+        "#!/bin/bash",
+        f"# Auto-generated bash completion for {csxu_name}",
+        "# This file provides command and parameter completion for the CLI",
+        "",
+        f"_{csxu_name}_completion() {{",
+        "    local cur prev words cword",
+        "    COMPREPLY=()",
+        "    cur=\"${COMP_WORDS[COMP_CWORD]}\"",
+        "    prev=\"${COMP_WORDS[COMP_CWORD-1]}\"",
+        "    words=(\"${COMP_WORDS[@]}\")",
+        "    cword=${COMP_CWORD}",
+        "",
+        "    # Find the -i flag and get the command name",
+        "    local cmd_name=\"\"",
+        "    for ((i=1; i<cword; i++)); do",
+        "        if [[ \"${words[i]}\" == \"-i\" && $((i+1)) -lt $cword ]]; then",
+        "            cmd_name=\"${words[i+1]}\"",
+        "            break",
+        "        fi",
+        "    done",
+        "",
+    ]
+    
+    # Add available commands list
+    available_commands = list(commands.keys())
+    script_lines.append(f"    # Available commands")
+    script_lines.append(f"    local available_commands=\"{' '.join(available_commands)}\"")
+    script_lines.append("")
+    
+    # Handle -i flag completion (command names)
+    script_lines.append("    # Complete -i flag with command names")
+    script_lines.append("    if [[ \"${prev}\" == \"-i\" ]]; then")
+    script_lines.append("        COMPREPLY=($(compgen -W \"${available_commands}\" -- \"${cur}\"))")
+    script_lines.append("        return 0")
+    script_lines.append("    fi")
+    script_lines.append("")
+    
+    # If a command is identified, offer its parameters and values
+    script_lines.append("    # If command is identified, offer parameters and values")
+    script_lines.append("    if [[ -n \"${cmd_name}\" ]]; then")
+    script_lines.append("        case \"${cmd_name}\" in")
+    
+    # For each command, generate parameter completions
+    for cmd_name, cmd_data in commands.items():
+        if not isinstance(cmd_data, dict):
+            continue
+        
+        script_lines.append(f"            {cmd_name})")
+        
+        # Extract mandatory and optional parameters
+        params_mandatory_str = cmd_data.get('paramsMandatory', '[]')
+        params_optional_str = cmd_data.get('paramsOptional', '[]')
+        
+        params_mandatory = parse_list_string(params_mandatory_str)
+        params_optional = parse_list_string(params_optional_str)
+        
+        # Combine both lists for parameter names
+        all_params = params_mandatory + params_optional
+        
+        script_lines.append(f"                # Mandatory parameters: {', '.join(params_mandatory) if params_mandatory else 'none'}")
+        script_lines.append(f"                # Optional parameters: {', '.join(params_optional) if params_optional else 'none'}")
+        
+        # Generate parameter flag completions
+        param_flags = [f"--{p}" for p in all_params]
+        param_flags_str = " ".join(param_flags)
+        
+        script_lines.append(f"                local parameters=\"{param_flags_str}\"")
+        script_lines.append("")
+        
+        # Check if we're completing a parameter value
+        script_lines.append("                # Check if previous word is a parameter flag")
+        script_lines.append("                case \"${prev}\" in")
+        
+        for param in all_params:
+            # Check if parameter has enum values
+            if param in params_fp and isinstance(params_fp[param], dict):
+                enums = params_fp[param].get('enums', {})
+                if enums:
+                    enum_values = " ".join(sorted(enums.keys()))
+                    script_lines.append(f"                    --{param})")
+                    script_lines.append(f"                        COMPREPLY=($(compgen -W \"{enum_values}\" -- \"${{cur}}\"))")
+                    script_lines.append(f"                        return 0")
+                    script_lines.append(f"                        ;;")
+        
+        script_lines.append("                    *)")
+        script_lines.append("                        # Default: offer available parameters")
+        script_lines.append("                        COMPREPLY=($(compgen -W \"${parameters}\" -- \"${cur}\"))")
+        script_lines.append("                        return 0")
+        script_lines.append("                        ;;")
+        script_lines.append("                esac")
+        script_lines.append("                ;;")
+    
+    # Default case if no matching command
+    script_lines.append("            *)")
+    script_lines.append("                COMPREPLY=($(compgen -W \"${available_commands}\" -- \"${cur}\"))")
+    script_lines.append("                return 0")
+    script_lines.append("                ;;")
+    script_lines.append("        esac")
+    script_lines.append("    else")
+    script_lines.append("        # If no command yet, offer -i flag completion")
+    script_lines.append("        COMPREPLY=($(compgen -W \"-i\" -- \"${cur}\"))")
+    script_lines.append("        return 0")
+    script_lines.append("    fi")
+    script_lines.append("}")
+    script_lines.append("")
+    script_lines.append(f"complete -o bashdefault -o default -o nospace -F _{csxu_name}_completion {csxu_name}")
+    
+    return "\n".join(script_lines)
 
 
 
