@@ -655,8 +655,6 @@ class csxuFpsToGraphviz(cs.Cmnd):
 ** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Generate Graphviz diagram from CSXU parameters dictionary.
         #+end_org """)
 
-        
-
         try:
             # Load the parameters dictionary from the file created by csxuFpsToPyDict
             if not pyDictResultPath:
@@ -793,7 +791,8 @@ class csxuFpsToCliCompgen(cs.Cmnd):
             
             return cmndOutcome.set(
                 opError=b.OpError.Success,
-                opResults=str(output_file),
+                # opResults=str(output_file),
+                opResults=f"source {output_file}",
             )
             
         except Exception as e:
