@@ -356,10 +356,30 @@ def convert_literal_string(value_str):
         return value_str
 
 def walk_directory_to_dict(directory_path):
-    """Recursively walk through a directory and create a nested dictionary."""
+    """
+    Recursively walk through a directory and create a nested dictionary.
+    
+    This function traverses the entire directory tree, converting:
+    - Subdirectories into nested dictionaries
+    - Files into dictionary values (content converted to Python types if possible)
+    
+    Special handling:
+    - Captures all nested structures including:
+      * csxuInfo/ - CSXU metadata (name, version, status, description, etc.)
+      * csxuCmndsFp/ - Command definitions with parameters
+      * argsSpec/ - Command argument specifications (argPosition, argName, etc.)
+      * paramsFp/ - Global parameter definitions and enums
+    - Skips: 'derived', '__pycache__', and other build artifacts
+    
+    Args:
+        directory_path: Root directory path to walk
+        
+    Returns:
+        Nested dictionary representing the directory structure with file contents as values
+    """
     result = {}
     # Directories to skip
-    skip_dirs = {'derived', '__pycache__'}
+    skip_dirs = {'derived', '__pycache__', '_pycache__', '.git', '.gitignore'}
     
     try:
         dir_obj = Path(directory_path)
@@ -368,12 +388,13 @@ def walk_directory_to_dict(directory_path):
         return result
     
     for entry in entries:
-        # Skip specified directories
-        if entry in skip_dirs:
+        # Skip specified directories and hidden files (except for _tree_ and _objectType_)
+        if entry in skip_dirs or (entry.startswith('.') and entry not in {'_tree_', '_objectType_'}):
             continue
             
         full_path = Path(directory_path) / entry
         if full_path.is_dir():
+            # Recursively process subdirectories
             result[entry] = walk_directory_to_dict(full_path)
         elif full_path.is_file():
             try:
@@ -385,7 +406,30 @@ def walk_directory_to_dict(directory_path):
     return result
 
 def create_csxu_dict(csxu_base_path, csxu_name):
-    """Create a dictionary from CSXU file parameters."""
+    """
+    Create a complete dictionary from CSXU file parameters.
+    
+    This function reads all File Parameters (FPs) from a CSXU's inSchema directory
+    and converts them into a nested Python dictionary structure.
+    
+    The resulting dictionary includes:
+    - csxuInfo: Metadata about the CSXU (name, version, status, category, description, etc.)
+    - csxuCmndsFp: All commands with their:
+      * paramsMandatory: List of mandatory parameter names
+      * paramsOptional: List of optional parameter names
+      * argsSpec: Argument specifications for commands that take positional arguments
+    - paramsFp: Global parameter definitions with:
+      * description: Parameter description
+      * value: Default value
+      * enums: Enumeration values (if applicable)
+    
+    Args:
+        csxu_base_path: Base path containing CSXU directories (typically /bisos/var/csxu)
+        csxu_name: Name of the CSXU (typically with .cs extension, e.g., "facter.cs")
+        
+    Returns:
+        Dictionary in format {csxu_name: {...full structure...}} or None if path invalid
+    """
     csxu_path = Path(csxu_base_path) / csxu_name
     if not csxu_path.is_dir():
         return None
@@ -414,6 +458,13 @@ def create_graphviz_diagram(params_dict_input, csxu_name):
     """
     Create a Graphviz diagram from the parameters dictionary.
     
+    Visualizes:
+    - CSXU structure and commands
+    - Command argument counts (from argsLen)
+    - Command arguments (from argsSpec, if argsLen > 0)
+    - Command parameters (mandatory and optional)
+    - Parameter enumerations
+    
     Args:
         params_dict_input: The nested parameters dictionary
         csxu_name: Name of the CSXU to visualize
@@ -430,6 +481,7 @@ def create_graphviz_diagram(params_dict_input, csxu_name):
     colors = {
         'csxu': '#FF6B6B',          # Red for csxu (root)
         'command': '#4ECDC4',       # Teal for commands
+        'arg': '#FFB6C1',           # Light pink for arguments
         'param_mandatory': '#95E1D3',  # Light green for mandatory params
         'param_optional': '#FFF9C4',   # Light yellow for optional params
         'enum': '#B0BEC5'           # Blue-gray for enum values
@@ -454,10 +506,58 @@ def create_graphviz_diagram(params_dict_input, csxu_name):
                 if not isinstance(cmd_data, dict):
                     continue
                 
-                # Create command node
+                # Get argsLen to determine if command has arguments
+                args_len_data = cmd_data.get('argsLen', {})
+                args_len = {}
+                if isinstance(args_len_data, dict):
+                    args_len = args_len_data
+                elif isinstance(args_len_data, str):
+                    try:
+                        args_len = ast.literal_eval(args_len_data)
+                    except:
+                        args_len = {}
+                
+                # Extract Min value to show number of arguments
+                min_args = args_len.get('Min', 0) if isinstance(args_len, dict) else 0
+                max_args = args_len.get('Max', 0) if isinstance(args_len, dict) else 0
+                
+                # Create command node with argument count in label
+                if min_args > 0 or max_args > 0:
+                    cmd_label = f"{cmd_name}\n(args: {min_args}-{max_args})"
+                else:
+                    cmd_label = cmd_name
+                
                 cmd_node_id = f"cmd_{current_csxu_name}_{cmd_name}"
-                dot.node(cmd_node_id, label=cmd_name, color=colors['command'], fontcolor='white')
+                dot.node(cmd_node_id, label=cmd_label, color=colors['command'], fontcolor='white')
                 dot.edge(csxu_node_id, cmd_node_id)
+                
+                # Add argument specification nodes if Min > 0 and argsSpec exists
+                if min_args > 0 and 'argsSpec' in cmd_data:
+                    args_spec = cmd_data['argsSpec']
+                    if isinstance(args_spec, dict):
+                        # Extract argument information
+                        arg_name = 'arg'
+                        arg_position = '0'
+                        
+                        if 'argName' in args_spec:
+                            arg_name_data = args_spec['argName']
+                            if isinstance(arg_name_data, dict) and 'value' in arg_name_data:
+                                arg_name = str(arg_name_data['value']).strip()
+                            elif isinstance(arg_name_data, str):
+                                arg_name = arg_name_data.strip()
+                        
+                        if 'argPosition' in args_spec:
+                            arg_pos_data = args_spec['argPosition']
+                            if isinstance(arg_pos_data, dict) and 'value' in arg_pos_data:
+                                arg_position = str(arg_pos_data['value']).strip()
+                            elif isinstance(arg_pos_data, (int, str)):
+                                arg_position = str(arg_pos_data).strip()
+                        
+                        # Create argument node
+                        arg_node_id = f"arg_{current_csxu_name}_{cmd_name}_{arg_name}"
+                        arg_label = f"{arg_name}\n[pos: {arg_position}]"
+                        dot.node(arg_node_id, label=arg_label, color=colors['arg'], fontcolor='black')
+                        dot.edge(cmd_node_id, arg_node_id)
                 
                 # Parse mandatory and optional parameters
                 params_mandatory_str = cmd_data.get('paramsMandatory', '[]')
@@ -602,6 +702,11 @@ class csxuFpsToPyDict(cs.Cmnd):
 
         self.cmndDocStr(f""" #+begin_org
 ** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Convert CSXU file parameters to Python dictionary.
+   This command processes all File Parameters (FPs) from a CSXU's inSchema directory
+   and generates a complete Python dictionary representation including:
+   - csxuInfo: CSXU metadata (name, version, status, category, description, features, etc.)
+   - csxuCmndsFp: Command definitions with parameters and argument specifications
+   - paramsFp: Parameter definitions with enums and descriptions
         #+end_org """)
 
         # Build the CSXU directory path
@@ -917,7 +1022,7 @@ class csxuFpsToCliCompgen(cs.Cmnd):
 
 def generate_bash_completion(csxu_name, commands, params_fp):
     """
-    Generate a bash completion script from commands and parameters.
+    Generate a bash completion script from commands and parameters and arguments.
     
     Args:
         csxu_name: Name of the CSXU
@@ -930,7 +1035,7 @@ def generate_bash_completion(csxu_name, commands, params_fp):
     script_lines = [
         "#!/bin/bash",
         f"# Auto-generated bash completion for {csxu_name}",
-        "# This file provides command and parameter completion for the CLI",
+        "# This file provides command, parameter, and argument completion for the CLI",
         "",
         f"_{csxu_name}_completion() {{",
         "    local cur prev words cword",
@@ -970,7 +1075,7 @@ def generate_bash_completion(csxu_name, commands, params_fp):
     script_lines.append("    if [[ -n \"${cmd_name}\" ]]; then")
     script_lines.append("        case \"${cmd_name}\" in")
     
-    # For each command, generate parameter completions
+    # For each command, generate parameter and argument completions
     for cmd_name, cmd_data in commands.items():
         if not isinstance(cmd_data, dict):
             continue
@@ -987,8 +1092,25 @@ def generate_bash_completion(csxu_name, commands, params_fp):
         # Combine both lists for parameter names
         all_params = params_mandatory + params_optional
         
+        # Extract argsLen information (similar to Graphviz enhancement)
+        args_len_data = cmd_data.get('argsLen', {})
+        args_len = {}
+        if isinstance(args_len_data, dict):
+            args_len = args_len_data
+        elif isinstance(args_len_data, str):
+            try:
+                args_len = ast.literal_eval(args_len_data)
+            except:
+                args_len = {}
+        
+        min_args = args_len.get('Min', 0) if isinstance(args_len, dict) else 0
+        max_args = args_len.get('Max', 0) if isinstance(args_len, dict) else 0
+        
         script_lines.append(f"                # Mandatory parameters: {', '.join(params_mandatory) if params_mandatory else 'none'}")
         script_lines.append(f"                # Optional parameters: {', '.join(params_optional) if params_optional else 'none'}")
+        
+        if min_args > 0 or max_args > 0:
+            script_lines.append(f"                # Command accepts {min_args}-{max_args} arguments")
         
         # Generate parameter flag completions
         param_flags = [f"--{p}" for p in all_params]
@@ -1013,9 +1135,72 @@ def generate_bash_completion(csxu_name, commands, params_fp):
                     script_lines.append(f"                        ;;")
         
         script_lines.append("                    *)")
-        script_lines.append("                        # Default: offer available parameters")
-        script_lines.append("                        COMPREPLY=($(compgen -W \"${parameters}\" -- \"${cur}\"))")
-        script_lines.append("                        return 0")
+        
+        # If command accepts arguments and current word doesn't start with --, handle args
+        if min_args > 0:
+            script_lines.append("                        # Check if we should complete arguments vs parameters")
+            script_lines.append("                        if [[ \"${cur}\" != -* ]]; then")
+            
+            # Extract argument information from argsSpec (only if Min > 0)
+            arg_choices = []
+            arg_name = "arg"
+            arg_desc = ""
+            
+            if 'argsSpec' in cmd_data and isinstance(cmd_data['argsSpec'], dict):
+                args_spec = cmd_data['argsSpec']
+                
+                # Extract argument name
+                if 'argName' in args_spec:
+                    arg_name_data = args_spec['argName']
+                    if isinstance(arg_name_data, dict) and 'value' in arg_name_data:
+                        arg_name = str(arg_name_data['value']).strip()
+                    elif isinstance(arg_name_data, str):
+                        arg_name = arg_name_data.strip()
+                
+                # Extract argument description if available
+                if 'argDescription' in args_spec:
+                    desc_data = args_spec['argDescription']
+                    if isinstance(desc_data, dict) and 'value' in desc_data:
+                        arg_desc = str(desc_data['value']).strip()
+                    elif isinstance(desc_data, str):
+                        arg_desc = desc_data.strip()
+                
+                # Extract argument choices if available
+                if 'argChoices' in args_spec:
+                    choices_data = args_spec['argChoices']
+                    if isinstance(choices_data, dict):
+                        if 'value' in choices_data:
+                            choices_str = str(choices_data['value']).strip()
+                            try:
+                                arg_choices = parse_list_string(choices_str)
+                            except:
+                                pass
+                    elif isinstance(choices_data, str):
+                        try:
+                            arg_choices = parse_list_string(choices_data)
+                        except:
+                            pass
+            
+            if arg_choices:
+                choices_str = " ".join(arg_choices)
+                script_lines.append(f"                            # {arg_name}: {arg_desc}")
+                script_lines.append(f"                            COMPREPLY=($(compgen -W \"{choices_str}\" -- \"${{cur}}\"))")
+            else:
+                script_lines.append(f"                            # {arg_name}: {arg_desc}")
+                script_lines.append(f"                            # No specific choices, allowing any input")
+                script_lines.append(f"                            return 0")
+            
+            script_lines.append("                            return 0")
+            script_lines.append("                        else")
+            script_lines.append("                            # Current word starts with -, complete parameters")
+            script_lines.append("                            COMPREPLY=($(compgen -W \"${parameters}\" -- \"${cur}\"))")
+            script_lines.append("                            return 0")
+            script_lines.append("                        fi")
+        else:
+            script_lines.append("                        # Default: offer available parameters")
+            script_lines.append("                        COMPREPLY=($(compgen -W \"${parameters}\" -- \"${cur}\"))")
+            script_lines.append("                        return 0")
+        
         script_lines.append("                        ;;")
         script_lines.append("                esac")
         script_lines.append("                ;;")
