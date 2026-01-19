@@ -100,11 +100,11 @@ import os
 #+BEGIN_SRC emacs-lisp
 (setq  b:py:cs:csuList
   (list
-   "bisos.csPlayer.csxuFpsTo"
+   "bisos.csPlayer.csxuFps_csu"
  ))
 #+END_SRC
 #+RESULTS:
-| bisos.csPlayer.csxuFpsTo |
+| bisos.csPlayer.csxuFps_csu |
 #+end_org """
 
 ####+BEGIN: b:py3:cs:framework/csuListProc :pyImports t :csuImports t :csuParams t :csxuParams nil
@@ -112,9 +112,9 @@ import os
 *  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CsFrmWrk   [[elisp:(outline-show-subtree+toggle)][||]] ~Process CSU List~ with /1/ in csuList pyImports=t csuImports=t csuParams=t
 #+end_org """
 
-from bisos.csPlayer import csxuFpsTo
+from bisos.csPlayer import csxuFps_csu
 
-csuList = [ 'bisos.csPlayer.csxuFpsTo', ]
+csuList = [ 'bisos.csPlayer.csxuFps_csu', ]
 
 g_importedCmndsModules = cs.csuList_importedModules(csuList)
 
@@ -180,8 +180,8 @@ class examples(cs.Cmnd):
         cs.examples.myName(cs.G.icmMyName(), cs.G.icmMyFullName())
         cs.examples.commonBrief()
 
-        csxuFpsTo.examples_csu().pyCmnd()
-        csxuFpsTo.playerMenuExamples().pyCmnd()
+        csxuFps_csu.examples_csu().pyCmnd()
+        csxuFps_csu.playerMenuExamples().pyCmnd()
 
         return(cmndOutcome)
 

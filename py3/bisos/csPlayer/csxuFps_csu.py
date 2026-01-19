@@ -129,7 +129,7 @@ def commonParamsSpecify(
         parName='csxuFpsBasePath',
         parDescription="Path to a directory in which csxuFps can be found. Defaults to /bisos/var/csxu",
         parDataType=None,
-        parDefault="z",
+        parDefault=f"/bisos/var/csxu",
         parChoices=[],
         argparseShortOpt=None,
         argparseLongOpt='--csxuFpsBasePath',
@@ -179,7 +179,15 @@ def commonParamsSpecify(
         argparseShortOpt=None,
         argparseLongOpt='--cliCompgenResultPath',
     )
-
+    csParams.parDictAdd(
+        parName='moduleFpsBasePath',
+        parDescription=f"Path to a directory in which moduleFps can be found. Defaults to /bisos/var/tocsModules/{cs.G.icmMyName()}/modules",
+        parDataType=None,
+        parDefault=f"/bisos/var/tocsModules/{cs.G.icmMyName()}/modules",
+        parChoices=[],
+        argparseShortOpt=None,
+        argparseLongOpt='--moduleFpsBasePath',
+    )
 
 
 ####+BEGIN: blee:bxPanel:foldingSection :outLevel 0 :sep nil :title "Direct Command Services" :anchor ""  :extraInfo "Examples and CSs"
@@ -242,13 +250,14 @@ class examples_csu(cs.Cmnd):
 
         cs.examples.menuChapter('=CSXU FPs Create=')
 
-        cmnd('csxuInSchema', args=csxuFpsBase)
+        cmnd('csxuInSchemaFps', pars=csxuFpsBasePars)
 
         cs.examples.menuChapter('=CSXU FPs to Py Dictionary and Graphviz=')
 
         #cmnd('csxuFpsToPyDict', pars=csxuPyDictPars)
         cmnd('csxuFpsToPyDict', pars=csxuAllPars)
         cmnd('csxuFpsToGraphviz', pars=csxuAllPars)
+        cmnd('inSchema', args="pdf-emacs")
         cmnd('csxuFpsToCliCompgen', pars=csxuAllPars)
         # cmnd('csxuFpsToGraphvizShow', pars=csxuNameAndFpsBasePars)
 
@@ -284,6 +293,7 @@ class playerMenuExamples(cs.Cmnd):
 
         cs.examples.menuChapter('=CSXU Player Examples=')
 
+        cs.examples.cmndEnter('inSchema', args="pdf-emacs")
         cs.examples.cmndEnter('playerMenu')
 
         return(cmndOutcome)
@@ -712,6 +722,112 @@ class csxuFpsToGraphviz(cs.Cmnd):
             return b_io.eh.badOutcome(cmndOutcome, f"Error generating Graphviz diagram: {e}")
 
 
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "inSchema" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "csxuFpsBasePath csxuName csxuDerivedBasePath pyDictResultPath  graphvizResultPath" :argsMin 1 :argsMax 1 :pyInv ""
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<inSchema>>  =verify= parsOpt=csxuFpsBasePath csxuName csxuDerivedBasePath pyDictResultPath  graphvizResultPath argsMin=1 argsMax=1 ro=cli   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class inSchema(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ 'csxuFpsBasePath', 'csxuName', 'csxuDerivedBasePath', 'pyDictResultPath', 'graphvizResultPath', ]
+    cmndArgsLen = {'Min': 1, 'Max': 1,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+             csxuFpsBasePath: typing.Optional[str]=None,  # Cs Optional Param
+             csxuName: typing.Optional[str]=None,  # Cs Optional Param
+             csxuDerivedBasePath: typing.Optional[str]=None,  # Cs Optional Param
+             pyDictResultPath: typing.Optional[str]=None,  # Cs Optional Param
+             graphvizResultPath: typing.Optional[str]=None,  # Cs Optional Param
+             argsList: typing.Optional[list[str]]=None,  # CsArgs
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {'csxuFpsBasePath': csxuFpsBasePath, 'csxuName': csxuName, 'csxuDerivedBasePath': csxuDerivedBasePath, 'pyDictResultPath': pyDictResultPath, 'graphvizResultPath': graphvizResultPath, }
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
+            return failed(cmndOutcome)
+        cmndArgsSpecDict = self.cmndArgsSpec()
+        csxuFpsBasePath = csParam.mappedValue('csxuFpsBasePath', csxuFpsBasePath)
+        csxuName = csParam.mappedValue('csxuName', csxuName)
+        csxuDerivedBasePath = csParam.mappedValue('csxuDerivedBasePath', csxuDerivedBasePath)
+        pyDictResultPath = csParam.mappedValue('pyDictResultPath', pyDictResultPath)
+        graphvizResultPath = csParam.mappedValue('graphvizResultPath', graphvizResultPath)
+####+END:
+
+        self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Generate Graphviz diagram from CSXU parameters dictionary.
+        #+end_org """)
+
+        self.captureRunStr(""" #+begin_org
+*** Run Results
+#+begin_src sh :results output :session shared
+player.cs -i inSchema pdf-evince
+  #+end_src
+#+RESULTS:
+: pdf-evince
+: ** cmnd= evince /bisos/var/csxu/player.cs/derived/graphviz.pdf &
+: /bisos/var/csxu/player.cs/derived/graphviz.pdf
+
+        #+end_org """)
+
+
+        cmndArg = self.cmndArgsGet("0", cmndArgsSpecDict, argsList)
+        if not cmndArg: failed(cmndOutcome, f"Missing Mandatory Argument -- Expected one argument")
+
+        # Resolve path: if relative, prepend csxuDerivedBasePath
+        output_path_obj = Path(graphvizResultPath)
+        if not output_path_obj.is_absolute():
+            output_path_obj = Path(csxuDerivedBasePath) / output_path_obj
+
+        pdf_file = output_path_obj
+
+        if not pdf_file.exists():
+                return b_io.eh.badOutcome(cmndOutcome, f"Failed to find PDF file at {pdf_file}")
+
+        if cmndArg == "pdf-emacs" :
+            if b.subProc.Op(outcome=cmndOutcome, log=1,).bash(
+                    f"""bleeclient -i seeInOther {pdf_file}""",
+            ).isProblematic():  return(b_io.eh.badOutcome(cmndOutcome))
+
+        elif cmndArg == "pdf-evince" :
+            print(f"{cmndArg}")
+            if b.subProc.Op(outcome=cmndOutcome, log=1,).bash(
+                    f"""evince {pdf_file} &""",
+            ).isProblematic():  return(b_io.eh.badOutcome(cmndOutcome))
+        else:
+            print(f"Unknown arg={cmndArg}")
+
+
+        return cmndOutcome.set(
+            opError=b.OpError.Success,
+            opResults=output_path_obj,
+        )
+
+
+####+BEGIN: b:py3:cs:method/args :methodName "cmndArgsSpec" :methodType "anyOrNone" :retType "bool" :deco "default" :argsList "self"
+    """ #+begin_org
+**  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  Mtd-T-anyOrNone [[elisp:(outline-show-subtree+toggle)][||]] /cmndArgsSpec/ deco=default  deco=default  [[elisp:(org-cycle)][| ]]
+    #+end_org """
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmndArgsSpec(self, ):
+####+END:
+        """
+***** Cmnd Args Specification
+"""
+        cmndArgsSpecDict = cs.CmndArgsSpecDict()
+
+        cmndArgsSpecDict.argsDictAdd(
+            argPosition="0",
+            argName="cmndArg",
+            argDefault=None,
+            argChoices=[],
+            argDescription="Base in which inSchema File Parameters are created"
+        )
+
+        return cmndArgsSpecDict
+
+
 ####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "csxuFpsToCliCompgen" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "csxuFpsBasePath csxuName csxuDerivedBasePath cliCompgenResultPath" :argsMin 0 :argsMax 0 :pyInv ""
 """ #+begin_org
 *  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<csxuFpsToCliCompgen>>  =verify= parsOpt=csxuFpsBasePath csxuName csxuDerivedBasePath cliCompgenResultPath ro=cli   [[elisp:(org-cycle)][| ]]
@@ -923,27 +1039,27 @@ def generate_bash_completion(csxu_name, commands, params_fp):
 
 
 
-####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "csxuInSchema" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "" :argsMin 1 :argsMax 1 :pyInv ""
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "csxuInSchemaFps" :comment "" :extent "verify" :ro "cli" :parsMand "csxuFpsBasePath" :parsOpt "" :argsMin 0 :argsMax 0 :pyInv ""
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<csxuInSchema>>  =verify= argsMin=1 argsMax=1 ro=cli   [[elisp:(org-cycle)][| ]]
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<csxuInSchemaFps>>  =verify= parsMand=csxuFpsBasePath ro=cli   [[elisp:(org-cycle)][| ]]
 #+end_org """
-class csxuInSchema(cs.Cmnd):
-    cmndParamsMandatory = [ ]
+class csxuInSchemaFps(cs.Cmnd):
+    cmndParamsMandatory = [ 'csxuFpsBasePath', ]
     cmndParamsOptional = [ ]
-    cmndArgsLen = {'Min': 1, 'Max': 1,}
+    cmndArgsLen = {'Min': 0, 'Max': 0,}
 
     @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
     def cmnd(self,
              rtInv: cs.RtInvoker,
              cmndOutcome: b.op.Outcome,
-             argsList: typing.Optional[list[str]]=None,  # CsArgs
+             csxuFpsBasePath: typing.Optional[str]=None,  # Cs Mandatory Param
     ) -> b.op.Outcome:
 
         failed = b_io.eh.badOutcome
-        callParamsDict = {}
-        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
+        callParamsDict = {'csxuFpsBasePath': csxuFpsBasePath, }
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, None).isProblematic():
             return failed(cmndOutcome)
-        cmndArgsSpecDict = self.cmndArgsSpec()
+        csxuFpsBasePath = csParam.mappedValue('csxuFpsBasePath', csxuFpsBasePath)
 ####+END:
 
         self.cmndDocStr(f""" #+begin_org
@@ -959,10 +1075,10 @@ player.cs --upload=../../bin/facterModuleSample.py  -i clusterRun localhost othe
 
         #+end_org """)
 
-        cmndArg = self.cmndArgsGet("0", cmndArgsSpecDict, argsList)
-        if not cmndArg: failed(cmndOutcome, f"Missing Mandatory Argument -- Expected one argument")
+        # cmndArg = self.cmndArgsGet("0", cmndArgsSpecDict, argsList)
+        # if not cmndArg: failed(cmndOutcome, f"Missing Mandatory Argument -- Expected one argument")
 
-        csxuFpsBasePath = cmndArg
+        # csxuFpsBasePath = cmndArg
 
         # Ensure csxuFpsBasePath exists, create if necessary
         base_path = Path(csxuFpsBasePath)
@@ -1003,12 +1119,16 @@ player.cs --upload=../../bin/facterModuleSample.py  -i clusterRun localhost othe
         #     parRoot=f"{csxuInBase}/cmndLibsFp",
         # )
 
+        csxuInfoBase = csxuInBase  / Path("csxuInfo")
+
+        csxuInfoAsFPs(csxuInfoBase)
+
         return cmndOutcome.set(
             opError=b.OpError.Success,
             opResults=csxuInBase,
         )
 
-####+BEGIN: b:py3:cs:method/args :methodName "cmndArgsSpec" :methodType "anyOrNone" :retType "bool" :deco "default" :argsList "self"
+####+BEGIN: b:py3:cs:method/args :methodName "cmndArgsSpecNOT" :methodType "anyOrNone" :retType "bool" :deco "default" :argsList "self"
     """ #+begin_org
 **  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  Mtd-T-anyOrNone [[elisp:(outline-show-subtree+toggle)][||]] /cmndArgsSpec/ deco=default  deco=default  [[elisp:(org-cycle)][| ]]
     #+end_org """
@@ -1029,6 +1149,40 @@ player.cs --upload=../../bin/facterModuleSample.py  -i clusterRun localhost othe
         )
 
         return cmndArgsSpecDict
+
+####+BEGIN: b:py3:cs:func/typing :funcName "csxuInfoAsFPs" :funcType "extTyped" :deco "track"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /csxuInfoAsFPs/  deco=track  [[elisp:(org-cycle)][| ]]
+#+end_org """
+@cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+def csxuInfoAsFPs(
+####+END:
+    fpsBase: Path,
+) -> None:
+    """ #+begin_org
+** [[elisp:(org-cycle)][| *DocStr | ]
+    #+end_org """
+
+    gCsInfo = cs.G.csInfo()
+
+    if 'category' in gCsInfo:
+        b.fp.FileParamWriteTo(fpsBase, "category", gCsInfo['category'])
+    if 'name' in gCsInfo:
+        b.fp.FileParamWriteTo(fpsBase, "name", gCsInfo['name'])
+    if 'features' in gCsInfo:
+        b.fp.FileParamWriteTo(fpsBase, "features", gCsInfo['features'])
+    if 'summary' in gCsInfo:
+        b.fp.FileParamWriteTo(fpsBase, "summary", gCsInfo['summary'])
+    if 'description' in gCsInfo:
+        b.fp.FileParamWriteTo(fpsBase, "description", gCsInfo['description'])
+    if 'panel' in gCsInfo:
+        b.fp.FileParamWriteTo(fpsBase, "panel", gCsInfo['panel'])
+    if 'version' in gCsInfo:
+        b.fp.FileParamWriteTo(fpsBase, "version", gCsInfo['version'])
+    if 'status' in gCsInfo:
+        b.fp.FileParamWriteTo(fpsBase, "status", gCsInfo['status'])
+
+
 
 ####+BEGIN: b:py3:cs:framework/endOfFile :basedOn "classification"
 """ #+begin_org
