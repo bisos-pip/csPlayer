@@ -43,6 +43,8 @@ and terminology.
 - [[#structure-of-bisos-pycs-command-line][Structure of BISOS-PyCS Command Line]]
 - [[#concepts-and-terminology][Concepts and Terminology]]
   - [[#elaborations][Elaborations]]
+- [[#input-syntax-of-values-of-parameters-and-arguments----python-literals][Input Syntax of Values of Parameters and Arguments -- Python Literals]]
+- [[#output-syntax-of-values-of-stdout-of-csxus----python-literals][Output Syntax of Values of stdout of CSXUs -- Python Literals]]
 - [[#audit-trailed-running-of-csxus][Audit Trailed Running of CSXUs]]
   - [[#stand-alone-audittrail-runs][Stand Alone AuditTrail Runs]]
   - [[#serial-audittrail-runs][Serial AuditTrail Runs]]
@@ -133,6 +135,8 @@ We are distinguishing between *parameters* (take values), *options* (don't take 
 
 The general form of Parameters, Options and Arguments is:
 
+*Parameters* are specified by "--" or "-" and take values.
+
 |----------------------+-------------------------------+--------------+------------------|
 | xu Element           | Description                   | Example      | Argparse Mapping |
 |----------------------+-------------------------------+--------------+------------------|
@@ -141,6 +145,8 @@ The general form of Parameters, Options and Arguments is:
 | Short Form Parameter |                               | -b value     |                  |
 |----------------------+-------------------------------+--------------+------------------|
 
+*Options* are parameters without values.
+
 |-------------------+----------------------------+--------------+------------------|
 | xu Element        | Description                | Example      | Argparse Mapping |
 |-------------------+----------------------------+--------------+------------------|
@@ -148,6 +154,8 @@ The general form of Parameters, Options and Arguments is:
 | Short Form Option | Options don't have values  | -h           |                  |
 |                   |                            | -v (verbose) |                  |
 |-------------------+----------------------------+--------------+------------------|
+
+*Arguments* are a list (ordered, positional) that are delivered to Cmnds.
 
 |----------------------+--------------------------+-------------+------------------|
 | xu Element           | Description              | Example     | Argparse Mapping |
@@ -170,9 +178,9 @@ The general form of Parameters, Options and Arguments is:
 |----------------+---------------------------------+-----------------+------------------------------------------|
 | csxuName.cs    |                                 | facter.cs       | The name of a Command or Service csxu    |
 |----------------+---------------------------------+-----------------+------------------------------------------|
-| csxuName.pcs   | Planted                         | facter.pcs      | A Planted csxu.                          |
+| [[csxuName.pcs]] | Planted                         | facter.pcs      | A Planted csxu.                          |
 |----------------+---------------------------------+-----------------+------------------------------------------|
-| csxuName.spcs  | Spread Planted                  | reactProc.spcs  | A Spread Planted csxu.                   |
+| [[csxuName.spcs]] | Spread Planted                  | reactProc.spcs  | A Spread Planted csxu.                   |
 |----------------+---------------------------------+-----------------+------------------------------------------|
 | csxuParams     | csxu Parameters                 | --log=30        |                                          |
 |----------------+---------------------------------+-----------------+------------------------------------------|
@@ -213,7 +221,7 @@ The general form of Parameters, Options and Arguments is:
 
 ** Elaborations
 
-<<xu>>            :: eXecution Unit is the broad term given to all that the csPlayer can run:
+<<xu>>            :: eXecution Unit is the broad term given to all that the csPlayer can run.
 It includes:
         - CSXUs: All command services
         - csMod:  CS Modules through their module players
@@ -221,6 +229,20 @@ It includes:
 
 <<csxuName.pcs>>  :: Planted Command Services. See NOTYET for details.
 
+<<csxuName.spcs>> :: Spread Planted Command Services. Based on [[csxuName.pcs]] but when current directory
+is relevant.
+
+* Input Syntax of Values of Parameters and Arguments -- Python Literals
+
+Unlike other command line processors, PyCS is directly tied to Python.
+The type of parameters and arguments are known by CSXUs in Python Literals terms.
+
+Lists and dictionaries are a common syntax for parameters.
+
+* Output Syntax of Values of stdout of CSXUs -- Python Literals
+
+Unlike other command line processors, where the stdout is unstrucured, CSXUs
+stdout is Python Literals and the syntax is obtainable through CMNDs of CSXUs.
 
 
 * Audit Trailed Running of CSXUs
