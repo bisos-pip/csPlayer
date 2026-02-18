@@ -175,21 +175,19 @@ class examples_csu(cs.Cmnd):
 
         pyCmnd_executeCmnds("From Function")
 
-        cmnd('executeCmnds', pars=od(list(execsHierarchyPars.items())), args=oneCsxuArgs, comment=f"# Execute and capture results")
-        cmnd('executeCmnds', pars=od(list(execsHierarchyPars.items())), wrapper=f"echo {oneCsxuArgs} |", comment=f"# From Stdin")
+        cmnd('xuLinesRun', pars=od(list(execsHierarchyPars.items())), args=oneCsxuArgs, comment=f"# Execute and capture results")
+        cmnd('xuLinesRun', pars=od(list(execsHierarchyPars.items())), wrapper=f"echo {oneCsxuArgs} |", comment=f"# From Stdin")
 
         return(cmndOutcome)
 
 
-####+BEGIN: b:py3:cs:func/typing :funcName "drf_csxuLineExecute" :funcType "extTyped" :deco "track"
+####+BEGIN: b:py3:cs:func/typing :funcName "drf_xuLineRun" :funcType "extTyped" :deco "track"
 """ #+begin_org
 *  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /drf_csxuLineExecute/  deco=track  [[elisp:(org-cycle)][| ]]
 #+end_org """
 @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
 def drf_csxuLineExecute(
 ####+END:
-        cmndLineStr: str,
-        execsHierarchy: list[str] = ['pip:dev-bisos3'],
         execsHierarchy: list[str],
         cmndLineList: list[str],
         destinations: list[str]),

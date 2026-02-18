@@ -18,11 +18,14 @@
 
 BISOS csPlayer is rooted in the model of interactive creation of command lines and running them.
 While the common structure of Command Line Interface (CLI) is assumed to be understood,
-it often is not. The vocabulary used to refer to the anatomy of a command line is a mess and scattered
+it often is not. The common vocabulary used to refer to the anatomy of a command line is a mess and scattered
 all over the place.
 
 In the context of PyCS and csPlayers, we have created our own reference model with precise vocabulary
 and terminology.
+
+The concepts, terminology and acronyms presented here are (should be) consistently used in our python
+code in this package and in all related packages.
 
 #+BEGIN: b:org:pypi:readme/pkgDocumentation :pkgName "csPlayer-cs" :comment "basic"
 
@@ -172,15 +175,19 @@ The general form of Parameters, Options and Arguments is:
 |----------------+---------------------------------+-----------------+------------------------------------------|
 | [[xu]]             | eXecution Unit                  | git             | Any Command, union of foreign+csxu+csMod |
 |----------------+---------------------------------+-----------------+------------------------------------------|
+| [[xuLine]]         | XU Command-Line                 |                 | The complete command-line to be [[run]]      |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| [[run]]        |                                 |                 | The generic concept of execting xuLine   |
+|----------------+---------------------------------+-----------------+------------------------------------------|
 | csxu           | Command Services eXecution Unit | facter.cs       | The executable of CS itself              |
 |----------------+---------------------------------+-----------------+------------------------------------------|
 | csxuName       |                                 |                 | Union of csxuName.{cs,pcs.spcs}          |
 |----------------+---------------------------------+-----------------+------------------------------------------|
 | csxuName.cs    |                                 | facter.cs       | The name of a Command or Service csxu    |
 |----------------+---------------------------------+-----------------+------------------------------------------|
-| [[csxuName.pcs]] | Planted                         | facter.pcs      | A Planted csxu.                          |
+| [[csxuName.pcs]]   | Planted                         | facter.pcs      | A Planted csxu.                          |
 |----------------+---------------------------------+-----------------+------------------------------------------|
-| [[csxuName.spcs]] | Spread Planted                  | reactProc.spcs  | A Spread Planted csxu.                   |
+| [[csxuName.spcs]]  | Spread Planted                  | reactProc.spcs  | A Spread Planted csxu.                   |
 |----------------+---------------------------------+-----------------+------------------------------------------|
 | csxuParams     | csxu Parameters                 | --log=30        |                                          |
 |----------------+---------------------------------+-----------------+------------------------------------------|
@@ -192,17 +199,17 @@ The general form of Parameters, Options and Arguments is:
 |----------------+---------------------------------+-----------------+------------------------------------------|
 | cmndArgs       | Command Arguments               |                 | Args Specific to Cmnd                    |
 |----------------+---------------------------------+-----------------+------------------------------------------|
-| csxuModPlayers | csxu Modules                    | facterModule.cs |                                          |
+| [[csxuModPlayers]] | csxu Module Players             | facterModule.cs |                                          |
 |                |                                 | soncli.cs       |                                          |
 |----------------+---------------------------------+-----------------+------------------------------------------|
 | csxuModules    |                                 | facterDisks.py  |                                          |
 |----------------+---------------------------------+-----------------+------------------------------------------|
 | adoptedModules |                                 | aSonModule.py   |                                          |
 |----------------+---------------------------------+-----------------+------------------------------------------|
-| csMod          | CS Module                       |                 | Union of csxuModules+AdoptedModules      |
-|                |                                 |                 | csMod maps to a csxuModProcessor as well |
+| [[csModules]]      | CS Module                       |                 | Union of csxuModules+AdoptedModules      |
+|                |                                 |                 | csMod maps to a csxuModPlayers as well   |
 |----------------+---------------------------------+-----------------+------------------------------------------|
-| csModParams    | CS Mod Parameters               |                 | Params Specific to Module                |
+| csModParams    | CS Module Parameters            |                 | Params Specific to Module                |
 |----------------+---------------------------------+-----------------+------------------------------------------|
 | xuSet          |                                 |                 | A set of related XUs                     |
 |----------------+---------------------------------+-----------------+------------------------------------------|
@@ -216,21 +223,37 @@ The general form of Parameters, Options and Arguments is:
 | modPlayerRun   |                                 |                 | Command Line Construction+Run of a       |
 |                |                                 |                 | csxuModProcessor with a csMod            |
 |----------------+---------------------------------+-----------------+------------------------------------------|
-| Destinations   |                                 |                 | Remote Operation Performers of Runs      |
+| [[destinations]]   |                                 |                 | Remote Operation Performers of Runs      |
 |----------------+---------------------------------+-----------------+------------------------------------------|
 
 ** Elaborations
 
-<<xu>>            :: eXecution Unit is the broad term given to all that the csPlayer can run.
+<<xu>>               :: eXecution Unit is the broad term given to all that the csPlayer can run.
 It includes:
         - CSXUs: All command services
         - csMod:  CS Modules through their module players
         - foreign commans:  Some non CS executables, such as git
 
-<<csxuName.pcs>>  :: Planted Command Services. See NOTYET for details.
+<<xuLine>>           :: The full command line ready to be [[run]].
 
-<<csxuName.spcs>> :: Spread Planted Command Services. Based on [[csxuName.pcs]] but when current directory
+<<run>>              :: The generic concept of execting xuLine. Be it immediately or in scheduled for future.
+Be it here or on a list of [[destinations]]. Be it serially or in parallel. In this model, you "run" an xuLine
+as opposed to "execute" an xuLine. You run an executable.
+
+<<csxuName.pcs>>     :: Planted Command Services. See NOTYET for details.
+
+<<csxuName.spcs>>    :: Spread Planted Command Services. Based on [[csxuName.pcs]] but when current directory
 is relevant.
+
+<<csxuModPlayers>>   :: CSXU Module Players are CSXUs that can "load-in" into themselves [[csModules]].
+See NOTYET for details.
+
+<<csModules>>        :: Are python modules that can be loaded-in [[csxuModPlayers]] and run.
+csModules often operate on a list of "targets" and can be run on multiple destinations.
+
+<<destinations>>     :: Destinations  are list of platforms that can run XUs.
+We distinguish between "destinations" and the generic term "servers" to indicate that
+we have the concept of a destination for running the XUs in mind..
 
 * Input Syntax of Values of Parameters and Arguments -- Python Literals
 

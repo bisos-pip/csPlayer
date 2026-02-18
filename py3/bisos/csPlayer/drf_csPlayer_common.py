@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def csxuLineExecute(operationBranch: list[str], command: list[str], servers: list[str]) -> dict:
     """Execute the operation with the given command and servers."""
 
-        print(f"submitOperation: operationBranch={operationBranch}, command={command}, servers={servers}")
+    print(f"submitOperation: operationBranch={operationBranch}, command={command}, servers={servers}")
     print(f"submitOperation: fullCommand={fullCommand}")
 
     auditTrail_csu.
