@@ -16,12 +16,12 @@
 
 * Overview
 
-BISOS csPlayer is rooted in the model of interactve creation of command line and running it.
-While the common structure of Command Line Interface (CLI) is assumed to have been understood,
-it hardly is. The vocabulary used to refer to the anatomy of a command line is a mess and all
-over the place.
+BISOS csPlayer is rooted in the model of interactive creation of command lines and running them.
+While the common structure of Command Line Interface (CLI) is assumed to be understood,
+it often is not. The vocabulary used to refer to the anatomy of a command line is a mess and scattered
+all over the place.
 
-In the context  PyCS and csPlayers, we have created our own reference model with a precise vocabular
+In the context of PyCS and csPlayers, we have created our own reference model with precise vocabulary
 and terminology.
 
 #+BEGIN: b:org:pypi:readme/pkgDocumentation :pkgName "csPlayer-cs" :comment "basic"
@@ -29,7 +29,7 @@ and terminology.
 # PYPI Documentation Comes Here in _description.org
 #+END:
 
-* Realted Resources
+* Related Resources
 
 | bisos Panel | [[file:/bisos/panels/bisos-core/bisos-pip/bisos.csPlayer/_nodeBase_/fullUsagePanel-en.org]] |
 |             |                                                                                         |
@@ -37,11 +37,10 @@ and terminology.
 
 * Table of Contents     :TOC:
 - [[#overview][Overview]]
-- [[#realted-resources][Realted Resources]]
+- [[#related-resources][Related Resources]]
 - [[#common-folklore-and-vocabulary-of-command-line----a-mess][Common Folklore and Vocabulary of Command Line -- A Mess]]
 - [[#anatomy-structure-and-terminology-of-bisos-pycs-and-csplayer-command-line][Anatomy, Structure and Terminology of BISOS-PyCS and csPlayer Command Line]]
 - [[#structure-of-bisos-pycs-command-line][Structure of BISOS-PyCS Command Line]]
-- [[#general-form-of-pycs-parameters-options-and-arguments][General form of PyCS Parameters, Options and Arguments]]
 - [[#concepts-and-terminology][Concepts and Terminology]]
 - [[#audit-trailed-running-of-csxus][Audit Trailed Running of CSXUs]]
   - [[#stand-alone-audittrail-runs][Stand Alone AuditTrail Runs]]
@@ -61,25 +60,41 @@ and terminology.
 
 * Common Folklore and Vocabulary of Command Line -- A Mess
 
-Dating back to K&R and getopt and argc and argv, arg[0] was the command line and the reset were arguments.
+Dating back to K&R and getopt and argc and argv, arg[0] was the command name and the rest were arguments.
 
-In there, were simplistic references to options and parameters and mixed with it were
-flags and  positional arguments.
+There were simplistic references to options and parameters mixed in with
+flags and positional arguments.
 
 Later came the notion of commands having sub-commands and the model of things like:
 
 #+BEGIN_EXAMPLE
-git             -c John            commit            -m  'My message'
-<commandName>  <commandArguments>  <subCommandName>  <subcommandArguments>
+git           -c user.name="John Doe"       commit            -m  'My message'
+<commandName>    <commandArguments>     <subCommandName>  <subcommandArguments>
 #+END_EXAMPLE
 
 Then came python with argparse with its own notions of arguments, parameters and options and flags.
 
+The existing vocabulary for Unix command line structure is a mess. Different sources use different terms 
+for the same concepts:
+- "arguments" vs "parameters" vs "options" vs "flags" - all used interchangeably
+- "positional arguments" vs "operands"
+- "short options" vs "short flags" vs "short parameters"
+
+Additionally, different tools have evolved with different conventions:
+- K&R/getopt era used simple terms (argv, argc)
+- POSIX added more structure but wasn't strictly enforced
+- GNU tools added long options (--flag)
+- Different tools (git, docker, python) all have different conventions
+
+This inconsistency and overlapping terminology motivated the creation of a clear, precise vocabulary
+for command line structure in the BISOS-PyCS and csPlayer ecosystem.
+
+
 * Anatomy, Structure and Terminology of BISOS-PyCS and csPlayer Command Line
 
-With BISOS-PyCS command line we introduce our own  terminology for command lines in general.
+With BISOS-PyCS command lines, we introduce our own terminology for command lines in general.
 
-In general what gets executed by the shell, we call an eXecution Unit (xu).
+In general, what gets executed by the shell we call an eXecution Unit (xu).
 The entire line delivered to the shell is called an xuLine.
 An xuLine consists of:
 
@@ -92,16 +107,16 @@ Having established the general structure of a command line, we now focus on csxu
 
 * Structure of BISOS-PyCS Command Line
 
-PyCS command-line has the follwoing general structure:
+PyCS command-line has the following general structure:
 
 #+BEGIN_EXAMPLE
 csxuLine =  <csxuName>  <csxuParameters> -i <commandName>   <commandParameters> -- <positionalArguments>
 #+END_EXAMPLE
 
 In this csxu model, the commandName is a parameter. It can be specified as -i <commandName> or
-as --invoke  <commandName>.
+as --invoke <commandName>.
 
-The above order is not enforced, the same csxuLine could also be:
+The above order is not enforced; the same csxuLine could also be:
 
 
 #+BEGIN_EXAMPLE
@@ -109,37 +124,36 @@ csxuLine =  <csxuName>  <csxuParameters>  <commandParameters> -i <commandName>  
 #+END_EXAMPLE
 
 csxuParameters apply to all commands.
-commandParameters are spcific to the specified commandName.
-
-The general form of Parameters, Options and Arguments  are:
+commandParameters are specific to the specified commandName.
 
 
-* General form of PyCS Parameters, Options and Arguments
 
+We are distinguishing between *parameters* (take values), *options* (don't take values), and *arguments* (positional)
 
-With PyCS, we make a clear destinction between parameters and arguments.
-Options are a special form of Parameters which do not take values.
+The general form of Parameters, Options and Arguments is:
 
 |----------------------+-------------------------------+--------------+------------------|
 | xu Element           | Description                   | Example      | Argparse Mapping |
 |----------------------+-------------------------------+--------------+------------------|
 | Long Form Parameter  | Assign a value to a parameter | --bpo=value  |                  |
 | Long Form Parameter  |                               | --bpo value  |                  |
-| Short Form Paramater |                               | -b value     |                  |
+| Short Form Parameter |                               | -b value     |                  |
 |----------------------+-------------------------------+--------------+------------------|
 
+|-------------------+----------------------------+--------------+------------------|
+| xu Element        | Description                | Example      | Argparse Mapping |
+|-------------------+----------------------------+--------------+------------------|
+| Long Form Option  | AKA Flag, enables/disables | --help       |                  |
+| Short Form Option | Options don't have values  | -h           |                  |
+|                   |                            | -v (verbose) |                  |
+|-------------------+----------------------------+--------------+------------------|
 
-|----------------------+----------------------------+--------------+---|
-| Long Form Option     | AKA Flag, enables/disables | --help       |   |
-| Short From Option    | Options don't have values  | -h           |   |
-|                      |                            | -v (verbose) |   |
-|----------------------+----------------------------+--------------+---|
-
-
-|----------------------+----------------------------+--------------+---|
-| Arguments            | Are ordered (poistional)   | file1 fileN  |   |
-| Positional Arguments |                            |              |   |
-|----------------------+----------------------------+--------------+---|
+|----------------------+--------------------------+-------------+------------------|
+| xu Element           | Description              | Example     | Argparse Mapping |
+|----------------------+--------------------------+-------------+------------------|
+| Arguments            | Are ordered (positional) | file1 fileN |                  |
+| Positional Arguments |                          |             |                  |
+|----------------------+--------------------------+-------------+------------------|
 
 
 * Concepts and Terminology
@@ -159,11 +173,11 @@ Options are a special form of Parameters which do not take values.
 |-------------------+---------------------------------+-----------------+------------------------------------------|
 | csxuName.spcs     | Spread Planted                  | reactProc.spcs  | A Spread Planted csxu.                   |
 |-------------------+---------------------------------+-----------------+------------------------------------------|
-| csxuParams        | csxu Prameters                  | --log=30        |                                          |
+| csxuParams        | csxu Parameters                  | --log=30        |                                          |
 |-------------------+---------------------------------+-----------------+------------------------------------------|
 | cmnd              | Command                         | -i factName     | The class method that performs cmndName  |
 |-------------------+---------------------------------+-----------------+------------------------------------------|
-| cmndName          | Command Name                    | factName        | the string that appears after --invoke   |
+| cmndName          | Command Name                    | factName        | The string that appears after --invoke   |
 |-------------------+---------------------------------+-----------------+------------------------------------------|
 | cmndParams        | Command Parameters              |                 | Params Specific to Cmnd                  |
 |-------------------+---------------------------------+-----------------+------------------------------------------|
@@ -183,7 +197,7 @@ Options are a special form of Parameters which do not take values.
 |-------------------+---------------------------------+-----------------+------------------------------------------|
 | xuSet             |                                 |                 | A set of related XUs                     |
 |-------------------+---------------------------------+-----------------+------------------------------------------|
-| xuSetTree         |                                 |                 | A set of related heierachical  XUs       |
+| xuSetTree         |                                 |                 | A set of related hierarchical XUs       |
 |-------------------+---------------------------------+-----------------+------------------------------------------|
 | xuSetTreeName     |                                 |                 | Top of the tree maps to libName          |
 |-------------------+---------------------------------+-----------------+------------------------------------------|
@@ -254,7 +268,7 @@ Done with auditTrail.cs
 ** csPlayerPerf -- Django
 
 Knows no difference between csxu Runs and csxuModProcessor Runs.
-They are all Command lines to be run.
+They are all command lines to be run.
 
 ** csPlayerUI -- Gatsby
 
