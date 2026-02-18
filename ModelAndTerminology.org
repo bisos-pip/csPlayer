@@ -42,6 +42,7 @@ and terminology.
 - [[#anatomy-structure-and-terminology-of-bisos-pycs-and-csplayer-command-line][Anatomy, Structure and Terminology of BISOS-PyCS and csPlayer Command Line]]
 - [[#structure-of-bisos-pycs-command-line][Structure of BISOS-PyCS Command Line]]
 - [[#concepts-and-terminology][Concepts and Terminology]]
+  - [[#elaborations][Elaborations]]
 - [[#audit-trailed-running-of-csxus][Audit Trailed Running of CSXUs]]
   - [[#stand-alone-audittrail-runs][Stand Alone AuditTrail Runs]]
   - [[#serial-audittrail-runs][Serial AuditTrail Runs]]
@@ -158,57 +159,67 @@ The general form of Parameters, Options and Arguments is:
 
 * Concepts and Terminology
 
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| Concept           | Full Name                       | Example         | Description                              |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| xu                | eXecution Unit                  | git             | Any Command, union of foreign+csxu+csMod |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| csxu              | Command Services eXecution Unit | facter.cs       | The executable of CS itself              |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| csxuName          |                                 |                 | Union of csxuName.{cs,pcs.spcs}          |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| csxuName.cs       |                                 | facter.cs       | The name of a Command or Service csxu    |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| csxuName.pcs      | Planted                         | facter.pcs      | A Planted csxu.                          |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| csxuName.spcs     | Spread Planted                  | reactProc.spcs  | A Spread Planted csxu.                   |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| csxuParams        | csxu Parameters                  | --log=30        |                                          |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| cmnd              | Command                         | -i factName     | The class method that performs cmndName  |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| cmndName          | Command Name                    | factName        | The string that appears after --invoke   |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| cmndParams        | Command Parameters              |                 | Params Specific to Cmnd                  |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| cmndArgs          | Command Arguments               |                 | Args Specific to Cmnd                    |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| csxuModProcessors | csxu Modules                    | facterModule.cs |                                          |
-|                   |                                 | soncli.cs       |                                          |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| csxuModules       |                                 | facterDisks.py  |                                          |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| adoptedModules    |                                 | aSonModule.py   |                                          |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| csMod             | CS Module                       |                 | Union of csxuModules+AdoptedModules      |
-|                   |                                 |                 | csMod maps to a csxuModProcessor as well |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| csModParams       | CS Mod Parameters               |                 | Params Specific to Module                |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| xuSet             |                                 |                 | A set of related XUs                     |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| xuSetTree         |                                 |                 | A set of related hierarchical XUs       |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| xuSetTreeName     |                                 |                 | Top of the tree maps to libName          |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| csxuPlayerRun     |                                 |                 | Command Line Construction+Run of a csxu  |
-|                   |                                 |                 | inside of a csPlayer                     |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| modPlayerRun      |                                 |                 | Command Line Construction+Run of a       |
-|                   |                                 |                 | csxuModProcessor with a csMod            |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
-| Destinations      |                                 |                 | Remote Operation Performers of Runs      |
-|-------------------+---------------------------------+-----------------+------------------------------------------|
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| Concept        | Full Name                       | Example         | Description                              |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| [[xu]]             | eXecution Unit                  | git             | Any Command, union of foreign+csxu+csMod |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| csxu           | Command Services eXecution Unit | facter.cs       | The executable of CS itself              |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| csxuName       |                                 |                 | Union of csxuName.{cs,pcs.spcs}          |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| csxuName.cs    |                                 | facter.cs       | The name of a Command or Service csxu    |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| csxuName.pcs   | Planted                         | facter.pcs      | A Planted csxu.                          |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| csxuName.spcs  | Spread Planted                  | reactProc.spcs  | A Spread Planted csxu.                   |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| csxuParams     | csxu Parameters                 | --log=30        |                                          |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| cmnd           | Command                         | -i factName     | The class method that performs cmndName  |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| cmndName       | Command Name                    | factName        | The string that appears after --invoke   |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| cmndParams     | Command Parameters              |                 | Params Specific to Cmnd                  |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| cmndArgs       | Command Arguments               |                 | Args Specific to Cmnd                    |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| csxuModPlayers | csxu Modules                    | facterModule.cs |                                          |
+|                |                                 | soncli.cs       |                                          |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| csxuModules    |                                 | facterDisks.py  |                                          |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| adoptedModules |                                 | aSonModule.py   |                                          |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| csMod          | CS Module                       |                 | Union of csxuModules+AdoptedModules      |
+|                |                                 |                 | csMod maps to a csxuModProcessor as well |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| csModParams    | CS Mod Parameters               |                 | Params Specific to Module                |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| xuSet          |                                 |                 | A set of related XUs                     |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| xuSetTree      |                                 |                 | A set of related hierarchical XUs        |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| xuSetTreeName  |                                 |                 | Top of the tree maps to libName          |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| csxuPlayerRun  |                                 |                 | Command Line Construction+Run of a csxu  |
+|                |                                 |                 | inside of a csPlayer                     |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| modPlayerRun   |                                 |                 | Command Line Construction+Run of a       |
+|                |                                 |                 | csxuModProcessor with a csMod            |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+| Destinations   |                                 |                 | Remote Operation Performers of Runs      |
+|----------------+---------------------------------+-----------------+------------------------------------------|
+
+** Elaborations
+
+<<xu>>            :: eXecution Unit is the broad term given to all that the csPlayer can run:
+It includes:
+        - CSXUs: All command services
+        - csMod:  CS Modules through their module players
+        - foreign commans:  Some non CS executables, such as git
+
+<<csxuName.pcs>>  :: Planted Command Services. See NOTYET for details.
 
 
 
