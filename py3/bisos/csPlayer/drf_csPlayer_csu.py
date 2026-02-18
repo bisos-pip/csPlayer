@@ -93,7 +93,8 @@ from bisos.common import csParam
 import collections
 ####+END:
 
-from bisos.csPlayer import drf_csPlayer_pipDevBisos3
+
+from bisos.csPlayer import csxuFps_csu
 
 from pathlib import Path
 import importlib.util
@@ -121,6 +122,7 @@ def commonParamsSpecify(
 ####+END:
         csParams: cs.param.CmndParamDict,
 ) -> None:
+    return
     csParams.parDictAdd(
         parName='drfExecPath',
         parDescription="Path to the drfExecutable.py file to test",

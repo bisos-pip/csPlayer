@@ -1,0 +1,307 @@
+#+title: Anatomy of PyCS Command Lines as Used by csPlayers
+#+DATE: <2026-02-17 Tue 16:04>
+#+AUTHOR: Mohsen BANAN
+#+OPTIONS: toc:4
+
+#+BEGINNOT: b:org:pypi:readme/topControls :pkgName "csPlayer" :comment "basic"
+
+|----------------------+------------------------------------------------------------------|
+| ~Blee Panel Controls~: | [[elisp:(show-all)][Show-All]] : [[elisp:(org-shifttab)][Overview]] : [[elisp:(progn (org-shifttab) (org-content))][Content]] : [[elisp:(delete-other-windows)][(1)]] : [[elisp:(progn (save-buffer) (kill-buffer))][S&Q]] : [[elisp:(save-buffer)][Save]]  : [[elisp:(kill-buffer)][Quit]]  : [[elisp:(bury-buffer)][Bury]] |
+| ~Panel Links~:         | [[file:./py3/panels/bisos.csPlayer/_nodeBase_/fullUsagePanel-en.org][Repo Blee Panel]]                                                  |
+| ~See Also~:            | [[https://pypi.org/project/bisos.csPlayer][At PYPI]] : [[https://github.com/bisos-pip/pycs][bisos.csPlayer]]                                         |
+|----------------------+------------------------------------------------------------------|
+
+#+END:
+
+
+* Overview
+
+BISOS csPlayer is rooted in the model of interactve creation of command line and running it.
+While the common structure of Command Line Interface (CLI) is assumed to have been understood,
+it hardly is. The vocabulary used to refer to the anatomy of a command line is a mess and all
+over the place.
+
+In the context  PyCS and csPlayers, we have created our own reference model with a precise vocabular
+and terminology.
+
+#+BEGIN: b:org:pypi:readme/pkgDocumentation :pkgName "csPlayer-cs" :comment "basic"
+
+# PYPI Documentation Comes Here in _description.org
+#+END:
+
+* Realted Resources
+
+| bisos Panel | file:/bisos/panels/bisos-core/bisos-pip/bisos.csPlayer/_nodeBase_/fullUsagePanel-en.org |
+|             |                                                                                         |
+
+
+* Table of Contents     :TOC:
+- [[#overview][Overview]]
+- [[#realted-resources][Realted Resources]]
+- [[#common-folklore-and-vocabulary-of-command-line----a-mess][Common Folklore and Vocabulary of Command Line -- A Mess]]
+- [[#anatomy-structure-and-terminology-of-bisos-pycs-and-csplayer-command-line][Anatomy, Structure and Terminology of BISOS-PyCS and csPlayer Command Line]]
+- [[#structure-of-bisos-pycs-command-line][Structure of BISOS-PyCS Command Line]]
+- [[#general-form-of-pycs-parameters-options-and-arguments][General form of PyCS Parameters, Options and Arguments]]
+- [[#concepts-and-terminology][Concepts and Terminology]]
+- [[#audit-trailed-running-of-csxus][Audit Trailed Running of CSXUs]]
+  - [[#stand-alone-audittrail-runs][Stand Alone AuditTrail Runs]]
+  - [[#serial-audittrail-runs][Serial AuditTrail Runs]]
+  - [[#parallel-audittrail-runs][Parallel AuditTrail Runs]]
+- [[#web-csplayer----csplayerperfhere-cslineinvokerhere-csplayeruihere][Web csPlayer -- csPlayerPerf.here, csLineInvoker.here, csPlayerUi.here]]
+  - [[#cslineinvoker][csLineInvoker]]
+  - [[#csplayerperf][csPlayerPerf]]
+- [[#remote-operation-cmnds----ro-cmnds][Remote Operation Cmnds -- RO-Cmnds]]
+  - [[#rpyc-operations][RPyC Operations]]
+  - [[#rpyc-invoker][RPyC Invoker]]
+  - [[#rpyc-performer][RPyC Performer]]
+  - [[#drf-operations][DRF Operations]]
+  - [[#drf-invoker][DRF Invoker]]
+  - [[#drf-performer][DRF Performer]]
+
+* Common Folklore and Vocabulary of Command Line -- A Mess
+
+Dating back to K&R and getopt and argc and argv, arg[0] was the command line and the reset were arguments.
+
+In there, were simplistic references to options and parameters and mixed with it were
+flags and  positional arguments.
+
+Later came the notion of commands having sub-commands and the model of things like:
+
+#+BEGIN_EXAMPLE
+git             -c John            commit            -m  'My message'
+<commandName>  <commandArguments>  <subCommandName>  <subcommandArguments>
+#+END_EXAMPLE
+
+Then came python with argparse with its own notions of arguments, parameters and options and flags.
+
+* Anatomy, Structure and Terminology of BISOS-PyCS and csPlayer Command Line
+
+With BISOS-PyCS command line we introduce our own  terminology for command lines in general.
+
+In general what gets executed by the shell, we call an eXecution Unit (xu).
+The entire line delivered to the shell is called an xuLine.
+An xuLine consists of:
+
+#+BEGIN_EXAMPLE
+xuLine =  <xuName>  <xuParameters> <command>  <commandParameters> <positionalArguments>
+#+END_EXAMPLE
+
+Having established the general structure of a command line, we now focus on csxuLine
+(Command Services eXecution Unit) as:
+
+* Structure of BISOS-PyCS Command Line
+
+PyCS command-line has the follwoing general structure:
+
+#+BEGIN_EXAMPLE
+csxuLine =  <csxuName>  <csxuParameters> -i <commandName>   <commandParameters> -- <positionalArguments>
+#+END_EXAMPLE
+
+In this csxu model, the commandName is a parameter. It can be specified as -i <commandName> or
+as --invoke  <commandName>.
+
+The above order is not enforced, the same csxuLine could also be:
+
+
+#+BEGIN_EXAMPLE
+csxuLine =  <csxuName>  <csxuParameters>  <commandParameters> -i <commandName>  <positionalArguments>
+#+END_EXAMPLE
+
+csxuParameters apply to all commands.
+commandParameters are spcific to the specified commandName.
+
+The general form of Parameters, Options and Arguments  are:
+
+
+* General form of PyCS Parameters, Options and Arguments
+
+
+With PyCS, we make a clear destinction between parameters and arguments.
+Options are a special form of Parameters which do not take values.
+
+|----------------------+-------------------------------+--------------+------------------|
+| xu Element           | Description                   | Example      | Argparse Mapping |
+|----------------------+-------------------------------+--------------+------------------|
+| Long Form Parameter  | Assign a value to a parameter | --bpo=value  |                  |
+| Long Form Parameter  |                               | --bpo value  |                  |
+| Short Form Paramater |                               | -b value     |                  |
+|----------------------+-------------------------------+--------------+------------------|
+| Long Form Option     | AKA Flag, enables/disables    | --help       |                  |
+| Short From Option    | Options don't have values     | -h           |                  |
+|                      |                               | -v (verbose) |                  |
+|----------------------+-------------------------------+--------------+------------------|
+| Arguments            | Are ordered (poistional)      | file1 fileN  |                  |
+| Positional Arguments |                               |              |                  |
+|----------------------+-------------------------------+--------------+------------------|
+
+
+* Concepts and Terminology
+
+|-------------------+--------------------+-----------------+------------------------------------------|
+| Concept           | Full Name          | Example         | Description                              |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| xu                | eXecution Unit     | git             | Any Command, union of foreign+csxu+csMod |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| csxu              | Command Services   | facter.cs       | The executable of CS itself              |
+|                   | eXecution Unit     |                 |                                          |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| csxuName          |                    |                 | Union of csxuName.{cs,pcs.spcs}          |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| csxuName.cs       |                    | facter.cs       | The name of a Command or Service csxu    |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| csxuName.pcs      | Planted            | facter.pcs      | A Planted csxu.                          |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| csxuName.spcs     | Spread Planted     | reactProc.spcs  | A Spread Planted csxu.                   |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| csxuParams        | csxu Prameters     | --log=30        |                                          |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| cmnd              | Command            | -i factName     | The class method that performs cmndName  |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| cmndName          | Command Name       | factName        | the string that appears after --invoke   |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| cmndParams        | Command Parameters |                 | Params Specific to Cmnd                  |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| cmndArgs          | Command Arguments  |                 | Args Specific to Cmnd                    |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| csxuModProcessors | csxu Modules       | facterModule.cs |                                          |
+|                   |                    | soncli.cs       |                                          |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| csxuModules       |                    | facterDisks.py  |                                          |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| adoptedModules    |                    | aSonModule.py   |                                          |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| csMod             | CS Module          |                 | Union of csxuModules+AdoptedModules      |
+|                   |                    |                 | csMod maps to a csxuModProcessor as well |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| csModParams       | CS Mod Parameters  |                 |  Params Specific to Module               |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| xuSet             |                    |                 | A set of related XUs                     |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| xuSetTree         |                    |                 | A set of related heierachical  XUs       |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| xuSetTreeName     |                    |                 | Top of the tree maps to libName          |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| csxuPlayerRun     |                    |                 | Command Line Construction+Run of a csxu  |
+|                   |                    |                 | inside of a csPlayer                     |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| modPlayerRun      |                    |                 | Command Line Construction+Run of a       |
+|                   |                    |                 | csxuModProcessor with a csMod            |
+|-------------------+--------------------+-----------------+------------------------------------------|
+| Destinations      |                    |                 | Remote Operation Performers of Runs      |
+|-------------------+--------------------+-----------------+------------------------------------------|
+
+
+
+* Audit Trailed Running of CSXUs
+
+Done with auditTrail.cs
+
+** Stand Alone AuditTrail Runs
+
+** Serial AuditTrail Runs
+
+** Parallel AuditTrail Runs
+
+* Web csPlayer -- csPlayerPerf.here, csLineInvoker.here, csPlayerUi.here
+
+** csLineInvoker
+
+- Provides choice of a csxuPlayerRun or a modPlayerRun
+- Presents xuSetTrees To users so that one csxuName or one csxuModProcessors (eg soncli.cs) is selected
+
+- For selected csxuName -> next
+- In a single page seprate out -> next
+    - cmndName
+    - csxuParams
+    - cmndParams
+    - cmndArgs
+- Select Destinations -> next
+  "Here" is the default
+- Select Execution -> submit
+   - Run now
+   - Scheduled Run
+   - If multiple Destinations
+     - Run Serially
+     - Run in Parallel
+  - After submit, display The RunInstanceId and a  "New Command Line"
+
+
+- For selected csxuModProcessors -> next
+- In a single page seprate out -> next
+    - csMod
+    - csxuParams
+    - csModParams
+- If possibel Select Targets -> next -- Otherwise targets are modRun cmndArgs
+    - Upload List or Specify or NuOfRandoms or All
+    - Targets are added to params on cli construction
+- Select Destinations -> next
+    - If Uploaded List or Specified, Destinations must be one and only one
+    - NuOfRandoms or All Destinations must be one or more
+- Select Execution -> submit
+   - Run now
+   - Scheduled Run
+   - If multiple Destinations
+     - Run Serially
+     - Run in Parallel
+  - After submit, display The RunInstanceId and a  "New Command Line"
+
+** csPlayerPerf
+
+Knows no difference between csxu Runs and csxuModProcessor Runs.
+They are all Command lines to be run.
+
+* Remote Operation Cmnds -- RO-Cmnds
+
+RPyC and DRF are supported by PyCS.
+
+** RPyC Operations
+
+Triggered by rtInv of Cmnd Class
+
+** RPyC Invoker
+
+Triggered by --perfName
+
+** RPyC Performer
+
+Systemd Daemon
+
+** DRF Operations
+
+Enabled by addition of xuSetTreeName as Django Lib of csPlayer
+
+** DRF Invoker
+
+Similar to auditTrail.cs, called drfInvoke.cs -- Uses --perfName of RPyC
+
+** DRF Performer
+
+Django CS player
+
+
+
+# ###+BEGIN: blee:bxPanel:footerOrgParams :panelType "readme"
+#+STARTUP: overview
+#+STARTUP: lognotestate
+#+STARTUP: inlineimages
+#+SEQ_TODO: TODO WAITING DELEGATED | DONE DEFERRED CANCELLED
+#+TAGS: @desk(d) @home(h) @work(w) @withInternet(i) @road(r) call(c) errand(e)
+#+CATEGORY: U:csPlayer
+
+# ###+END:
+
+# ###+BEGIN: blee:bxPanel:footerEmacsParams :primMode "org-mode" :panelType "readme"
+# Local Variables:
+# eval: (setq-local toc-org-max-depth 4)
+# eval: (setq-local ~selectedSubject "noSubject")
+# eval: (setq-local ~primaryMajorMode 'org-mode)
+# eval: (setq-local ~blee:panelUpdater nil)
+# eval: (setq-local ~blee:dblockEnabler nil)
+# eval: (setq-local ~blee:dblockController "interactive")
+# eval: (img-link-overlays)
+# eval: (set-fill-column 115)
+# eval: (blee:fill-column-indicator/enable)
+# eval: (bx:load-file:ifOneExists "./panelActions.el")
+# End:
+
+# ###+END

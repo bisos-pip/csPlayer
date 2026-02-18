@@ -16,7 +16,7 @@ SEED="
 *  /[dblock]/ /Seed/ :: [[file:/bisos/core/bsip/bin/seedBleePanelProc.sh]] |
 "
 FILE="
-*  /This File/ :: /bisos/git/bxRepos/bisos-pip/csPlayer/py3/panels/bisos.csPlayer/README/bleePanelProc.sh
+*  /This File/ :: /bisos/git/bxRepos/bisos-pip/csPlayer/py3/panels/bisos.csPlayer/ModelAndTerminology/bleePanelProc.sh
 "
 if [ "${loadFiles}" == "" ] ; then
     /bisos/core/bsip/bin/seedBleePanelProc.sh -l $0 "$@"

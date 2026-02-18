@@ -13,13 +13,13 @@ __copying__="
 
 ####+BEGIN: bx:bsip:bash:seed-spec :types "seedBleePanelProc.sh"
 SEED="
-*  /[dblock]/ /Seed/ :: [[file:/bisos/core/bsip/bin/seedBleePanelProc.sh]] | 
+*  /[dblock]/ /Seed/ :: [[file:/bisos/core/bsip/bin/seedBleePanelProc.sh]] |
 "
 FILE="
-*  /This File/ :: /bisos/apps/defaults/update/bleePanel/start/bleePanelProc.sh 
+*  /This File/ :: /bisos/git/bxRepos/bisos-pip/csPlayer/py3/panels/bisos.csPlayer/bleePanelProc.sh
 "
 if [ "${loadFiles}" == "" ] ; then
-    /bisos/core/bsip/bin/seedBleePanelProc.sh -l $0 "$@" 
+    /bisos/core/bsip/bin/seedBleePanelProc.sh -l $0 "$@"
     exit $?
 fi
 ####+END:

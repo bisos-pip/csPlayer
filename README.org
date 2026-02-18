@@ -5,11 +5,7 @@
 
 #+BEGIN: b:org:pypi:readme/topControls :pkgName "csPlayer" :comment "basic"
 
-|----------------------+------------------------------------------------------------------|
-| ~Blee Panel Controls~: | [[elisp:(show-all)][Show-All]] : [[elisp:(org-shifttab)][Overview]] : [[elisp:(progn (org-shifttab) (org-content))][Content]] : [[elisp:(delete-other-windows)][(1)]] : [[elisp:(progn (save-buffer) (kill-buffer))][S&Q]] : [[elisp:(save-buffer)][Save]]  : [[elisp:(kill-buffer)][Quit]]  : [[elisp:(bury-buffer)][Bury]] |
-| ~Panel Links~:         | [[file:./py3/panels/bisos.capability/_nodeBase_/fullUsagePanel-en.org][Repo Blee Panel]]                                                  |
-| ~See Also~:            | [[https://pypi.org/project/bisos.capability][At PYPI]] : [[https://github.com/bisos-pip/pycs][bisos.PyCS]]                                             |
-|----------------------+------------------------------------------------------------------|
+# TopControls don't apply to pypi.org documentation.
 
 #+END:
 
@@ -24,7 +20,11 @@ interactive emacs inteface. Emacs dynamic interactions are implemented based on 
 
 #+BEGIN: b:org:pypi:readme/pkgDocumentation :pkgName "csPlayer-cs" :comment "basic"
 
-# PYPI Documentation Comes Here in _description.org
+* Package Documentation At Github
+
+The information below is a subset of the full of documentation for this bisos-pip package.
+More complete documentation is available at: https://github.com/bisos-pip/csPlayer-cs
+
 #+END:
 
 * Realted Resources
@@ -35,6 +35,7 @@ interactive emacs inteface. Emacs dynamic interactions are implemented based on 
 
 * Table of Contents     :TOC:
 - [[#overview][Overview]]
+- [[#package-documentation-at-github][Package Documentation At Github]]
 - [[#realted-resources][Realted Resources]]
 - [[#installation][Installation]]
   - [[#installation-with-pip][Installation With pip]]
@@ -120,7 +121,7 @@ author/maintainer\\
 #+STARTUP: inlineimages
 #+SEQ_TODO: TODO WAITING DELEGATED | DONE DEFERRED CANCELLED
 #+TAGS: @desk(d) @home(h) @work(w) @withInternet(i) @road(r) call(c) errand(e)
-#+CATEGORY: U:csPlayer
+#+CATEGORY: L:README
 
 # ###+END:
 

@@ -87,3 +87,7 @@ class LibraryAPI(ABC):
     @abstractmethod
     def getParameters(self, operationBranch: list[str]) -> ParameterData:
         pass
+
+    @abstractmethod
+    def submitOperation(self, operationBranch: list[str], command: list[str], servers: list[str]) -> dict:
+        pass

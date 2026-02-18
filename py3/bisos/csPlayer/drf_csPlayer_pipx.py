@@ -94,3 +94,7 @@ class LibraryAPIImpl(drf.LibraryAPI):
         if operationData is None:
             return None
         return operationData['parameters']
+
+    def submitOperation(self, operationBranch: list[str], command: list[str], servers: list[str]) -> dict:
+        """Execute the operation with the given command and servers."""
+        return drf_csPlayer_common.csxuLineExecute(operationBranch, command, servers)
