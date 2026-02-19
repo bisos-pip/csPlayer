@@ -80,6 +80,7 @@ is correctly structured for use by drf_csPlayer_pipDevBisos3 and the DRF backend
 import collections
 # import pathlib
 # import invoke
+import ast
 
 ####+BEGIN: b:py3:cs:framework/imports :basedOn "classification"
 """ #+begin_org
@@ -97,7 +98,7 @@ from bisos.csPlayer import drf_csPlayer_pipDevBisos3
 
 from pathlib import Path
 import importlib.util
-from bisos.csPlayer import drf_csPlayer_pipDevBisos3
+from bisos.csPlayer import drf_csPlayer_common
 
 ####+BEGIN: b:py3:cs:orgItem/basic :type "=Executes=  "  :title "CSU-Lib Executions" :comment "-- cs.invOutcomeReportControl"
 """ #+begin_org
@@ -128,13 +129,13 @@ def commonParamsSpecify(
         csParams: cs.param.CmndParamDict,
 ) -> None:
     csParams.parDictAdd(
-        parName='execsHierarchy',
+        parName='xuSetTree',
         parDescription="Path to a directory in which csxuFps can be found. Defaults to /bisos/var/csxu/pip_dev-bisos3",
         parDataType=None,
         parDefault=f"['pip:dev-bisos3']",
         parChoices=[],
         argparseShortOpt=None,
-        argparseLongOpt='--execsHierarchy',
+        argparseLongOpt='--xuSetTree',
     )
 
 
@@ -166,91 +167,124 @@ class examples_csu(cs.Cmnd):
         od = collections.OrderedDict
         cmnd = cs.examples.cmndEnter
 
-        oneCsxuArgs = "-- facter.cs -i factName disks"
+        oneCsxuArgs = "-- 'facter.cs -i factName disks'"
+        oneCsxuArgsList = "-- facter.cs -i factName disks"
 
-        execsHierarchy = "['pip:dev-bisos3']"
-        execsHierarchyPars = od([('execsHierarchy', execsHierarchy),])
+        xuSetTree = "['pip:dev-bisos3']"
+        xuSetTreePars = od([('xuSetTree', xuSetTree),])
 
-        cs.examples.menuChapter('=Execute Commands=')
+        cs.examples.menuChapter('=drf_xuLineListRun=')
 
-        pyCmnd_executeCmnds("From Function")
+        cmnd('drf_xuLineListRun', pars=od(list(xuSetTreePars.items())), args=oneCsxuArgsList, comment=f"# Execute and capture results")
 
-        cmnd('xuLinesRun', pars=od(list(execsHierarchyPars.items())), args=oneCsxuArgs, comment=f"# Execute and capture results")
-        cmnd('xuLinesRun', pars=od(list(execsHierarchyPars.items())), wrapper=f"echo {oneCsxuArgs} |", comment=f"# From Stdin")
+        cs.examples.menuChapter('=Run xuLine (One)=')
+
+        cmnd('xuLineRun', pars=od(list(xuSetTreePars.items())), args=oneCsxuArgsList, comment=f"# Execute and capture results")
+
+        cs.examples.menuChapter('=Run xuLines=')
+
+        pyCmnd_xuLineRun("From Function")
+
+        cmnd('xuLinesRun', pars=od(list(xuSetTreePars.items())), args=oneCsxuArgs, comment=f"# Execute and capture results")
+        cmnd('xuLinesRun', pars=od(list(xuSetTreePars.items())), wrapper=f"echo {oneCsxuArgs} |", comment=f"# From Stdin")
 
         return(cmndOutcome)
 
 
 ####+BEGIN: b:py3:cs:func/typing :funcName "drf_xuLineRun" :funcType "extTyped" :deco "track"
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /drf_csxuLineExecute/  deco=track  [[elisp:(org-cycle)][| ]]
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /drf_xuLineRun/  deco=track  [[elisp:(org-cycle)][| ]]
 #+end_org """
 @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
-def drf_csxuLineExecute(
+def drf_xuLineRun(
 ####+END:
-        execsHierarchy: list[str],
-        cmndLineList: list[str],
-        destinations: list[str]),
-) -> dict:
+        xuSetTree: list[str],
+        xuLineList: list[str],
+        destinations: list[str],
+) -> dict | None:
     """ #+begin_org
 ** [[elisp:(org-cycle)][| *DocStr | ]
 #+end_org """
 
-    if executeCmnds().pyCmnd(
-            pyStdinArgs=[cmndLineStr,],
-            execsHierarchy=execsHierarchy,
-    ).isProblematic():
-                return(None)
+    xuName = xuLineList[0]
+
+    xuSetTreeName = xuSetTree[0]
+
+    xuSetBaseDir = drf_csPlayer_common.xuSetTreeNameToXuSetBaseDir(xuSetTreeName)
+
+    if xuSetBaseDir is None:
+        print(f"EH.critical xuName '{xuName}' not found in {xuSetBaseDir}")
+        return None
+
+    xuNamePath = drf_csPlayer_common.xuNameInXuSetBaseDir(
+        xuName,
+        xuSetBaseDir,
+    )
+
+    if xuNamePath is None:
+        #b_io.eh.critical(f"xuName '{xuName}' not found in {xuSetBaseDir}")
+        print(f"xuName '{xuName}' not found in {xuSetBaseDir}")
+        return None
+
+    # xuLineStr = ' '.join(xuLineList)
+
+    if not (results := xuLineRun().pyCmnd(
+            argsList=xuLineList,
+            xuSetTree=f"{xuSetTree}",
+    ).results):
+        # b_io.eh.critical(f"xuName '{xuName}' execution failed with xuSetTree {xuSetTree}")
+        print(f"xuName '{xuName}' execution failed with xuSetTree {xuSetTree} -- results={results}")
+        return(None)
+
+    return results
 
 
-####+BEGIN: b:py3:cs:func/typing :funcName "pyCmnd_executeCmnds" :funcType "extTyped" :deco "track"
+####+BEGIN: b:py3:cs:func/typing :funcName "pyCmnd_xuLineRun" :funcType "extTyped" :deco "track"
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /pyCmnd_executeCmnds/  deco=track  [[elisp:(org-cycle)][| ]]
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /pyCmnd_xuLineRun/  deco=track  [[elisp:(org-cycle)][| ]]
 #+end_org """
 @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
-def pyCmnd_executeCmnds(
+def pyCmnd_xuLineRun(
 ####+END:
-        cmndLineStr: str,
-        execsHierarchy: list[str] = ['pip:dev-bisos3'],
+        xuLineStr: str,
+        xuSetTree: list[str] = ['pip:dev-bisos3'],
 ) -> None:
     """ #+begin_org
 ** [[elisp:(org-cycle)][| *DocStr | ]
 #+end_org """
 
-    if executeCmnds().pyCmnd(
-            pyStdinArgs=[cmndLineStr,],
-            execsHierarchy=execsHierarchy,
+    if xuLinesRun().pyCmnd(
+            pyStdinArgs=[xuLineStr,],
+            xuSetTree=xuSetTree,
     ).isProblematic():
                 return(None)
 
-
-####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "executeCmnds" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "execsHierarchy" :argsMin 0 :argsMax 9999 :pyInv "pyStdinArgs"
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "xuLineRun" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "xuSetTree" :argsMin 0 :argsMax 9999 :pyInv ""
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<executeCmnds>>  =verify= parsOpt=execsHierarchy argsMax=9999 ro=cli pyInv=pyStdinArgs   [[elisp:(org-cycle)][| ]]
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<xuLineRun>>  =verify= parsOpt=xuSetTree argsMax=9999 ro=cli   [[elisp:(org-cycle)][| ]]
 #+end_org """
-class executeCmnds(cs.Cmnd):
+class xuLineRun(cs.Cmnd):
     cmndParamsMandatory = [ ]
-    cmndParamsOptional = [ 'execsHierarchy', ]
+    cmndParamsOptional = [ 'xuSetTree', ]
     cmndArgsLen = {'Min': 0, 'Max': 9999,}
 
     @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
     def cmnd(self,
              rtInv: cs.RtInvoker,
              cmndOutcome: b.op.Outcome,
-             execsHierarchy: typing.Optional[str]=None,  # Cs Optional Param
+             xuSetTree: typing.Optional[str]=None,  # Cs Optional Param
              argsList: typing.Optional[list[str]]=None,  # CsArgs
-             pyStdinArgs: typing.Any=None,   # pyInv Argument
     ) -> b.op.Outcome:
 
         failed = b_io.eh.badOutcome
-        callParamsDict = {'execsHierarchy': execsHierarchy, }
+        callParamsDict = {'xuSetTree': xuSetTree, }
         if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
             return failed(cmndOutcome)
         cmndArgsSpecDict = self.cmndArgsSpec()
-        execsHierarchy = csParam.mappedValue('execsHierarchy', execsHierarchy)
+        xuSetTree = csParam.mappedValue('xuSetTree', xuSetTree)
 ####+END:
         self.cmndDocStr(f""" #+begin_org
-** [[elisp:(org-cycle)][| *CmndDesc:* | ]] For each CSXU (as args or stdin) add it to availables list
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]] Run specified xuLine
         #+end_org """)
 
         self.captureRunStr(""" #+begin_org
@@ -263,8 +297,156 @@ class executeCmnds(cs.Cmnd):
         #+end_org """)
         if self.justCaptureP(): return cmndOutcome
 
+        cliArgs = self.cmndArgsGet("0&9999", cmndArgsSpecDict, argsList)
+
+        xuName = cliArgs[0]
+
+        try:
+            xuSetTreePy = ast.literal_eval(xuSetTree)
+        except (ValueError, SyntaxError) as e:
+            print(f"Failed to parse xuSetTree '{xuSetTree}': {e}")
+            return failed(cmndOutcome)
+
+        xuSetTreeName = xuSetTreePy[0]
+
+        xuSetBaseDir = drf_csPlayer_common.xuSetTreeNameToXuSetBaseDir(xuSetTreeName)
+
+        if xuSetBaseDir is None:
+            print(f"EH.critical xuName '{xuName}' not found in {xuSetBaseDir}")
+            return None
+
+        xuNamePath = drf_csPlayer_common.xuNameInXuSetBaseDir(
+            xuName,
+            xuSetBaseDir,
+        )
+
+        if xuNamePath is None:
+            #b_io.eh.critical(f"xuName '{xuName}' not found in {xuSetBaseDir}")
+            print(f"xuName '{xuName}' not found in {xuSetBaseDir}")
+            return None
+
+        # Create auditTrail directory structure if it doesn't exist
+        import os
+        from datetime import datetime
+        auditTrailDir = xuNamePath / "auditTrail"
+        currentUser = os.getlogin()
+        userAuditTrailDir = auditTrailDir / currentUser
+        
+        try:
+            userAuditTrailDir.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            b_io.eh.critical(f"Failed to create auditTrail directory {userAuditTrailDir}: {e}")
+            return None
+        
+        # Create timestamp-based directory (YYYYMMDDHHMMSS format)
+        currentTime = datetime.now().strftime("%Y%m%d%H%M%S")
+        timestampAuditDir = userAuditTrailDir / currentTime
+        
+        try:
+            timestampAuditDir.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            b_io.eh.critical(f"Failed to create timestamp directory {timestampAuditDir}: {e}")
+            return None
+
+        xuLineStr = ' '.join(cliArgs)
+
+        if b.subProc.Op(outcome=cmndOutcome, log=0, cd=f"{timestampAuditDir}", uid="bystar").bash(
+                f"""export PATH=$PATH:/bisos/venv/py3/dev-bisos3/bin;  {xuLineStr}""",
+                stdin="",
+        ).isProblematic():  return(b_io.eh.badOutcome(cmndOutcome))
+
+        # Write audit trail files
+        try:
+            # Write stdout
+            stdout_file = timestampAuditDir / "stdout"
+            stdout_file.write_text(cmndOutcome.stdout or "")
+            
+            # Write stderr
+            stderr_file = timestampAuditDir / "stderr"
+            stderr_file.write_text(cmndOutcome.stderr or "")
+            
+            # Write logs (using stdout as logs)
+            logs_file = timestampAuditDir / "logs"
+            logs_file.write_text(cmndOutcome.stdout or "")
+            
+            # Write exit code
+            exitCode_file = timestampAuditDir / "exitCode"
+            exitCode_file.write_text(str(cmndOutcome.exitCode) if hasattr(cmndOutcome, 'exitCode') else "0")
+            
+            # Write command line
+            cmndLine_file = timestampAuditDir / "cmndLine"
+            cmndLine_file.write_text(xuLineStr)
+        except Exception as e:
+            b_io.eh.critical(f"Failed to write audit trail files in {timestampAuditDir}: {e}")
+            return None
+
+        return cmndOutcome.set(
+            opResults= timestampAuditDir,
+        )
+
+####+BEGIN: b:py3:cs:method/args :methodName "cmndArgsSpec" :methodType "anyOrNone" :retType "bool" :deco "default" :argsList "self"
+    """ #+begin_org
+**  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  Mtd-T-anyOrNone [[elisp:(outline-show-subtree+toggle)][||]] /cmndArgsSpec/ deco=default  deco=default   [[elisp:(org-cycle)][| ]]
+    #+end_org """
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmndArgsSpec(self, ):
+####+END:
+        """  #+begin_org
+** [[elisp:(org-cycle)][| *cmndArgsSpec:* | ]]
+        #+end_org """
+
+        cmndArgsSpecDict = cs.arg.CmndArgsSpecDict()
+        cmndArgsSpecDict.argsDictAdd(
+            argPosition="0&9999",
+            argName="inputs",
+            argChoices=[],
+            argDescription="Rest of args for use by action"
+        )
+
+        return cmndArgsSpecDict
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "xuLinesRun" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "xuSetTree" :argsMin 0 :argsMax 9999 :pyInv "pyStdinArgs"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<xuLinesRun>>  =verify= parsOpt=xuSetTree argsMax=9999 ro=cli pyInv=pyStdinArgs   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class xuLinesRun(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ 'xuSetTree', ]
+    cmndArgsLen = {'Min': 0, 'Max': 9999,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+             xuSetTree: typing.Optional[str]=None,  # Cs Optional Param
+             argsList: typing.Optional[list[str]]=None,  # CsArgs
+             pyStdinArgs: typing.Any=None,   # pyInv Argument
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {'xuSetTree': xuSetTree, }
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
+            return failed(cmndOutcome)
+        cmndArgsSpecDict = self.cmndArgsSpec()
+        xuSetTree = csParam.mappedValue('xuSetTree', xuSetTree)
+####+END:
+        self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]] Run specified xuLine
+        #+end_org """)
+
+        self.captureRunStr(""" #+begin_org
+#+begin_src sh :results output :session shared
+  NotYet
+#+end_src
+#+RESULTS:
+:
+: OpError.Success
+        #+end_org """)
+        if self.justCaptureP(): return cmndOutcome
+
+
         def processEach(each):
-            """Add this CSXU to availables. Check if CSXU is already available, if so report and return, other wise invoke update"""
+            """Each is a xuLine"""
             print(f"ZZ {each} YY")
 
 ####+BEGINNOT: b:py3:func/processArgsAndStdin :comment auto-generated
@@ -296,6 +478,87 @@ class executeCmnds(cs.Cmnd):
 ####+END:
 
         return(cmndOutcome)
+
+
+####+BEGIN: b:py3:cs:method/args :methodName "cmndArgsSpec" :methodType "anyOrNone" :retType "bool" :deco "default" :argsList "self"
+    """ #+begin_org
+**  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  Mtd-T-anyOrNone [[elisp:(outline-show-subtree+toggle)][||]] /cmndArgsSpec/ deco=default  deco=default   [[elisp:(org-cycle)][| ]]
+    #+end_org """
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmndArgsSpec(self, ):
+####+END:
+        """  #+begin_org
+** [[elisp:(org-cycle)][| *cmndArgsSpec:* | ]]
+        #+end_org """
+
+        cmndArgsSpecDict = cs.arg.CmndArgsSpecDict()
+        cmndArgsSpecDict.argsDictAdd(
+            argPosition="0&9999",
+            argName="inputs",
+            argChoices=[],
+            argDescription="Rest of args for use by action"
+        )
+
+        return cmndArgsSpecDict
+
+
+####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "drf_xuLineListRun" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "xuSetTree" :argsMin 0 :argsMax 9999 :pyInv "pyStdinArgs"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<drf_xuLineListRun>>  =verify= parsOpt=xuSetTree argsMax=9999 ro=cli pyInv=pyStdinArgs   [[elisp:(org-cycle)][| ]]
+#+end_org """
+class drf_xuLineListRun(cs.Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ 'xuSetTree', ]
+    cmndArgsLen = {'Min': 0, 'Max': 9999,}
+
+    @cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+             rtInv: cs.RtInvoker,
+             cmndOutcome: b.op.Outcome,
+             xuSetTree: typing.Optional[str]=None,  # Cs Optional Param
+             argsList: typing.Optional[list[str]]=None,  # CsArgs
+             pyStdinArgs: typing.Any=None,   # pyInv Argument
+    ) -> b.op.Outcome:
+
+        failed = b_io.eh.badOutcome
+        callParamsDict = {'xuSetTree': xuSetTree, }
+        if self.invocationValidate(rtInv, cmndOutcome, callParamsDict, argsList).isProblematic():
+            return failed(cmndOutcome)
+        cmndArgsSpecDict = self.cmndArgsSpec()
+        xuSetTree = csParam.mappedValue('xuSetTree', xuSetTree)
+####+END:
+        self.cmndDocStr(f""" #+begin_org
+** [[elisp:(org-cycle)][| *CmndDesc:* | ]] Run specified xuLine
+        #+end_org """)
+
+        self.captureRunStr(""" #+begin_org
+#+begin_src sh :results output :session shared
+  NotYet
+#+end_src
+#+RESULTS:
+:
+: OpError.Success
+        #+end_org """)
+        if self.justCaptureP(): return cmndOutcome
+
+        xuLineList = self.cmndArgsGet("0&9999", cmndArgsSpecDict, argsList)
+
+        try:
+            xuSetTreePy = ast.literal_eval(xuSetTree)
+        except (ValueError, SyntaxError) as e:
+            b_io.eh.critical(f"Failed to parse xuSetTree '{xuSetTree}': {e}")
+            return failed(cmndOutcome)
+
+        results = drf_xuLineRun(
+            xuSetTreePy,
+            xuLineList,
+            destinations=[],
+        )
+
+        return cmndOutcome.set(
+            opResults=results,
+        )
+
 
 
 ####+BEGIN: b:py3:cs:method/args :methodName "cmndArgsSpec" :methodType "anyOrNone" :retType "bool" :deco "default" :argsList "self"

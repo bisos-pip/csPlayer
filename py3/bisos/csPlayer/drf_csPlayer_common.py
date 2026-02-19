@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from os import path
 import logging
 
@@ -17,16 +18,16 @@ def csxuLineExecute(operationBranch: list[str], command: list[str], servers: lis
     """Execute the operation with the given command and servers."""
 
     print(f"submitOperation: operationBranch={operationBranch}, command={command}, servers={servers}")
-    print(f"submitOperation: fullCommand={fullCommand}")
+    # print(f"submitOperation: fullCommand={fullCommand}")
 
-    auditTrail_csu.
+    return (
+        auditTrail_csu.drf_xuLineRun(
+            xuSetTree=operationBranch,
+            xuLineList=command,
+            destinations=servers,
+        )
+    )
 
-    return {
-        'status': 'success',
-        'message': 'Operation completed successfully',
-        'stdout': result.stdout,
-        'stderr': result.stderr
-    }
 
 def submitOperationOBSOLETE(operationBranch: list[str], command: list[str], servers: list[str]):
     """Execute the operation with the given command and servers."""
@@ -101,8 +102,6 @@ def _buildCommand(self, operation: Operation, command: list[str]) -> list[str]:
         return command
 
 
-
-
 def folderNameToEnabledBase(folderName: str) -> pathlib.Path | None:
     nameToBaseDict = {
         "pip:bisos3": "/bisos/var/csxu/pip_bisos3/enabled",
@@ -127,6 +126,8 @@ def folderNameToEnabledBase(folderName: str) -> pathlib.Path | None:
         return None
     
     return basePath
+
+xuSetTreeNameToXuSetBaseDir = folderNameToEnabledBase
 
 
 def csxuFolderObtain(csxuFolder: drf.OperationFolder,) -> drf.OperationFolder | None:
@@ -160,6 +161,29 @@ def csxuFolderObtain(csxuFolder: drf.OperationFolder,) -> drf.OperationFolder | 
         return None
     
     return csxuFolder
+
+
+def xuNameInXuSetBaseDir(
+        xuName: str,
+        xuSetBaseDir: pathlib.Path,
+) -> pathlib.Path | None:
+    """ Walkthrough xuSetBaseDir to find the specified xuName """
+    if xuSetBaseDir is None:
+        logger.error("xuSetBaseDir parameter is None")
+        return None
+
+    xuNamePath = xuSetBaseDir / xuName
+    
+    if not xuNamePath.exists():
+        logger.error(f"xuName '{xuName}' not found in {xuSetBaseDir}")
+        return None
+    
+    if not xuNamePath.is_dir():
+        logger.error(f"xuName path is not a directory: {xuNamePath}")
+        return None    
+   
+    return xuNamePath
+
 
 def executablesInfo_load(executablesFolderName: str,) -> None:
     """ Walkthrough and load CSXU operations from enabled directory based on folder name """

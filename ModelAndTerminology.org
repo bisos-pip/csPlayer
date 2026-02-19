@@ -177,7 +177,7 @@ The general form of Parameters, Options and Arguments is:
 |----------------+---------------------------------+-----------------+------------------------------------------|
 | [[xuLine]]         | XU Command-Line                 |                 | The complete command-line to be [[run]]      |
 |----------------+---------------------------------+-----------------+------------------------------------------|
-| [[run]]        |                                 |                 | The generic concept of execting xuLine   |
+| [[run]]            |                                 |                 | The generic concept of execting xuLine   |
 |----------------+---------------------------------+-----------------+------------------------------------------|
 | csxu           | Command Services eXecution Unit | facter.cs       | The executable of CS itself              |
 |----------------+---------------------------------+-----------------+------------------------------------------|

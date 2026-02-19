@@ -104,18 +104,17 @@ import os
  ))
 #+END_SRC
 #+RESULTS:
-| bisos.csPlayer.auditTrail_csu | bisos.csPlayer.csxuFps_csu |
+| bisos.csPlayer.auditTrail_csu |
 #+end_org """
 
 ####+BEGIN: b:py3:cs:framework/csuListProc :pyImports t :csuImports t :csuParams t :csxuParams nil
 """ #+begin_org
-*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CsFrmWrk   [[elisp:(outline-show-subtree+toggle)][||]] ~Process CSU List~ with /2/ in csuList pyImports=t csuImports=t csuParams=t
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CsFrmWrk   [[elisp:(outline-show-subtree+toggle)][||]] ~Process CSU List~ with /1/ in csuList pyImports=t csuImports=t csuParams=t
 #+end_org """
 
 from bisos.csPlayer import auditTrail_csu
-from bisos.csPlayer import csxuFps_csu
 
-csuList = [ 'bisos.csPlayer.auditTrail_csu', 'bisos.csPlayer.csxuFps_csu', ]
+csuList = [ 'bisos.csPlayer.auditTrail_csu', ]
 
 g_importedCmndsModules = cs.csuList_importedModules(csuList)
 
@@ -192,7 +191,7 @@ class examples(cs.Cmnd):
 #+end_org """
 ####+END:
 
-####+BEGIN: b:py3:cs:framework/main :csInfo "csInfo" :noCmndEntry "examples" :extraParamsHook "g_extraParams" :importedCmndsModules "g_importedCmndsModules" :ignoreUnknownParams "True"
+####+BEGIN: b:py3:cs:framework/main :csInfo "csInfo" :noCmndEntry "examples" :extraParamsHook "g_extraParams" :importedCmndsModules "g_importedCmndsModules"
 """ #+begin_org
 *  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CsFrmWrk   [[elisp:(outline-show-subtree+toggle)][||]] =g_csMain= (csInfo, _examples_, g_extraParams, g_importedCmndsModules)
 #+end_org """
@@ -202,7 +201,7 @@ if __name__ == '__main__':
         csInfo=csInfo,
         noCmndEntry=examples,  # specify a Cmnd name
         extraParamsHook=g_extraParams,
-        ignoreUnknownParams=True,
+        ignoreUnknownParams=False,  # True is for Uploaded Modules
         importedCmndsModules=g_importedCmndsModules,
     )
 
