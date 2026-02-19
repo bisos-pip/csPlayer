@@ -259,6 +259,80 @@ def pyCmnd_xuLineRun(
     ).isProblematic():
                 return(None)
 
+####+BEGIN: b:py3:cs:func/typing :funcName "findOrCreateDateTagDir" :funcType "extTyped" :deco "track"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /findOrCreateDateTagDir/  deco=track  [[elisp:(org-cycle)][| ]]
+#+end_org """
+@cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+def findOrCreateDateTagDir(
+####+END:
+        userAuditTrailDir: Path,
+        curTime: str,
+) -> Path | None:
+    """ #+begin_org
+** [[elisp:(org-cycle)][| *DocStr | ]
+Find or create a unique timestamped directory with collision avoidance.
+If the directory with curTime already exists, append -1, -2, -3, etc. until unique.
+Returns the Path to the created directory, or None on failure.
+#+end_org """
+    
+    # Start with the base directory name
+    dateTag = curTime
+    suffix = 0
+    
+    while True:
+        # Construct candidate directory name
+        if suffix == 0:
+            candidateDir = userAuditTrailDir / dateTag
+        else:
+            candidateDir = userAuditTrailDir / f"{dateTag}-{suffix}"
+        
+        # Check if it exists
+        if not candidateDir.exists():
+            # Create the unique directory
+            try:
+                candidateDir.mkdir(parents=True, exist_ok=True)
+                return candidateDir
+            except Exception as e:
+                b_io.eh.critical(f"Failed to create dateTag directory {candidateDir}: {e}")
+                return None
+        
+        # Directory exists, increment suffix and try again
+        suffix += 1
+
+####+BEGIN: b:py3:cs:func/typing :funcName "pathForXuSetTree" :funcType "extTyped" :deco "track"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /pathForXuSetTree/  deco=track  [[elisp:(org-cycle)][| ]]
+#+end_org """
+@cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+def pathForXuSetTree(
+####+END:
+        xuSetTree: list[str],
+) -> str | None:
+    """ #+begin_org
+** [[elisp:(org-cycle)][| *DocStr | ]
+Map xuSetTree to a Python virtual environment base path.
+Takes the first element of xuSetTree and maps it to the corresponding venv path.
+Returns the path to the bin directory of the virtual environment, or None on failure.
+#+end_org """
+    
+    # Mapping dictionary for xuSetTree names to venv paths
+    xuSetTreeMapping = {
+        'pip:dev-bisos3': '/bisos/venv/py3/dev-bisos3/bin',
+    }
+    
+    if not xuSetTree or len(xuSetTree) == 0:
+        b_io.eh.critical("xuSetTree is empty")
+        return None
+    
+    xuSetTreeName = xuSetTree[0]
+    
+    if xuSetTreeName not in xuSetTreeMapping:
+        b_io.eh.critical(f"xuSetTree '{xuSetTreeName}' not found in mapping")
+        return None
+    
+    return xuSetTreeMapping[xuSetTreeName]
+
 ####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "xuLineRun" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "xuSetTree" :argsMin 0 :argsMax 9999 :pyInv ""
 """ #+begin_org
 *  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  CmndSvc-   [[elisp:(outline-show-subtree+toggle)][||]] <<xuLineRun>>  =verify= parsOpt=xuSetTree argsMax=9999 ro=cli   [[elisp:(org-cycle)][| ]]
@@ -313,7 +387,7 @@ class xuLineRun(cs.Cmnd):
 
         if xuSetBaseDir is None:
             print(f"EH.critical xuName '{xuName}' not found in {xuSetBaseDir}")
-            return None
+            return failed(cmndOutcome)
 
         xuNamePath = drf_csPlayer_common.xuNameInXuSetBaseDir(
             xuName,
@@ -323,7 +397,7 @@ class xuLineRun(cs.Cmnd):
         if xuNamePath is None:
             #b_io.eh.critical(f"xuName '{xuName}' not found in {xuSetBaseDir}")
             print(f"xuName '{xuName}' not found in {xuSetBaseDir}")
-            return None
+            return failed(cmndOutcome)
 
         # Create auditTrail directory structure if it doesn't exist
         import os
@@ -336,22 +410,25 @@ class xuLineRun(cs.Cmnd):
             userAuditTrailDir.mkdir(parents=True, exist_ok=True)
         except Exception as e:
             b_io.eh.critical(f"Failed to create auditTrail directory {userAuditTrailDir}: {e}")
-            return None
+            return failed(cmndOutcome)
         
-        # Create timestamp-based directory (YYYYMMDDHHMMSS format)
-        currentTime = datetime.now().strftime("%Y%m%d%H%M%S")
-        timestampAuditDir = userAuditTrailDir / currentTime
+        # Create timestamp-based directory (YYYYMMDDHHMMSS format) with collision avoidance
+        curTime = datetime.now().strftime("%Y%m%d%H%M%S")
+        timestampAuditDir = findOrCreateDateTagDir(userAuditTrailDir, curTime)
         
-        try:
-            timestampAuditDir.mkdir(parents=True, exist_ok=True)
-        except Exception as e:
-            b_io.eh.critical(f"Failed to create timestamp directory {timestampAuditDir}: {e}")
-            return None
+        if timestampAuditDir is None:
+            return failed(cmndOutcome)
 
         xuLineStr = ' '.join(cliArgs)
 
+        # Get the virtual environment path for this xuSetTree
+        venvPath = pathForXuSetTree(xuSetTreePy)
+        
+        if venvPath is None:
+            return failed(cmndOutcome)
+
         if b.subProc.Op(outcome=cmndOutcome, log=0, cd=f"{timestampAuditDir}", uid="bystar").bash(
-                f"""export PATH=$PATH:/bisos/venv/py3/dev-bisos3/bin;  {xuLineStr}""",
+                f"""export PATH=$PATH:{venvPath};  {xuLineStr}""",
                 stdin="",
         ).isProblematic():  return(b_io.eh.badOutcome(cmndOutcome))
 
@@ -376,9 +453,14 @@ class xuLineRun(cs.Cmnd):
             # Write command line
             cmndLine_file = timestampAuditDir / "cmndLine"
             cmndLine_file.write_text(xuLineStr)
+            
+            # Create empty Results directory
+            results_dir = timestampAuditDir / "Results"
+            results_dir.mkdir(parents=True, exist_ok=True)
+
         except Exception as e:
             b_io.eh.critical(f"Failed to write audit trail files in {timestampAuditDir}: {e}")
-            return None
+            return failed(cmndOutcome)
 
         return cmndOutcome.set(
             opResults= timestampAuditDir,
