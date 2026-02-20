@@ -48,10 +48,7 @@ code in this package and in all related packages.
   - [[#elaborations][Elaborations]]
 - [[#input-syntax-of-values-of-parameters-and-arguments----python-literals][Input Syntax of Values of Parameters and Arguments -- Python Literals]]
 - [[#output-syntax-of-values-of-stdout-of-csxus----python-literals][Output Syntax of Values of stdout of CSXUs -- Python Literals]]
-- [[#audit-trailed-running-of-csxus][Audit Trailed Running of CSXUs]]
-  - [[#stand-alone-audittrail-runs][Stand Alone AuditTrail Runs]]
-  - [[#serial-audittrail-runs][Serial AuditTrail Runs]]
-  - [[#parallel-audittrail-runs][Parallel AuditTrail Runs]]
+- [[#audit-trailed-running-of-xus][Audit Trailed Running of XUs]]
 - [[#web-csplayer----csplayerperf-cslineinvoker-csplayerui][Web csPlayer -- csPlayerPerf, csLineInvoker, csPlayerUi]]
   - [[#cslineinvoker----react][csLineInvoker -- React]]
   - [[#csplayerperf----django][csPlayerPerf -- Django]]
@@ -268,15 +265,36 @@ Unlike other command line processors, where the stdout is unstrucured, CSXUs
 stdout is Python Literals and the syntax is obtainable through CMNDs of CSXUs.
 
 
-* Audit Trailed Running of CSXUs
+* Audit Trailed Running of XUs
 
-Done with auditTrail.cs
+Running of XUs through csPlayers or through running auditTrail.cs involved the following choices:
 
-** Stand Alone AuditTrail Runs
+- One Destintation
+  - immediate
+     - Foreground
+       exitCode, stdout, stderr, logs and Results dir diplayed.
 
-** Serial AuditTrail Runs
 
-** Parallel AuditTrail Runs
+     - Background
+       An instanceId is returned. Run Outcome Dir includes results
+
+  - Scheduled
+    - When to run it in background is specified
+
+- Multiple Destinations
+
+  - Parallel Runs
+
+    - Immediate Background
+
+    - Scheduled
+
+  - Serial Runs
+
+    - Immediate Background
+
+    - Scheduled
+
 
 * Web csPlayer -- csPlayerPerf, csLineInvoker, csPlayerUi
 
