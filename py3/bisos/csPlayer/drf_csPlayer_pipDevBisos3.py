@@ -1,10 +1,7 @@
 from __future__ import annotations
 
 from bisos.csPlayer import drf_csPlayer_abstract as drf
-
-from bisos.csPlayer import drf_csPlayer_abstract as drf
 from bisos.csPlayer import drf_csPlayer_common
-import pathlib
 
 operationsData = {}
 
@@ -13,7 +10,6 @@ def thisExecutablesFolderName() -> str:
 
 # Each execatuableInfo file sets this modules operationsData when it loads/imports/executes the drfExectable.py file.
 drf_csPlayer_common.executablesInfo_load(executablesFolderName=thisExecutablesFolderName())
-
 
 class LibraryAPIImpl(drf.LibraryAPI):
     libraryFolder = drf.OperationFolder(name=thisExecutablesFolderName())  # Must Match Registration
@@ -38,4 +34,5 @@ class LibraryAPIImpl(drf.LibraryAPI):
 
     def submitOperation(self, operationBranch: list[str], command: list[str], servers: list[str]) -> dict:
         """Execute the operation with the given command and servers."""
+        print(f"In drf_csPlayer_pipDevBisos3.py submitOperations command={command}")
         return drf_csPlayer_common.csxuLineExecute(operationBranch, command, servers)
