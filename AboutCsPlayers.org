@@ -1,0 +1,303 @@
+#+title: About csPlayers
+#+DATE: <2026-02-17 Tue 16:04>
+#+AUTHOR: Mohsen BANAN
+#+OPTIONS: toc:4
+
+#+BEGINNOT: b:org:pypi:readme/topControls :pkgName "csPlayer" :comment "basic"
+
+|----------------------+------------------------------------------------------------------|
+| ~Blee Panel Controls~: | [[elisp:(show-all)][Show-All]] : [[elisp:(org-shifttab)][Overview]] : [[elisp:(progn (org-shifttab) (org-content))][Content]] : [[elisp:(delete-other-windows)][(1)]] : [[elisp:(progn (save-buffer) (kill-buffer))][S&Q]] : [[elisp:(save-buffer)][Save]]  : [[elisp:(kill-buffer)][Quit]]  : [[elisp:(bury-buffer)][Bury]] |
+| ~Panel Links~:         | [[file:./py3/panels/bisos.csPlayer/_nodeBase_/fullUsagePanel-en.org][Repo Blee Panel]]                                                  |
+| ~See Also~:            | [[https://pypi.org/project/bisos.csPlayer][At PYPI]] : [[https://github.com/bisos-pip/pycs][bisos.csPlayer]]                                         |
+|----------------------+------------------------------------------------------------------|
+
+#+END:
+
+
+* Overview
+
+PyCS-Foundation and PyCS-Framework are rooted in the concept of "Expectation Complete Operations".
+
+This means that every Cmnd, realized as a CLI or as a Remote Operation Services (RO-Service) is
+capable of emiting all of its input expectations and its output deliverables. Being a CSXU
+(CS eXecution Unit) means that all the Cmnds within them are Expectation Complete.
+
+The machinary that is needed to expose input expectations of CSXUs and run them is called a
+"csPlayer"
+
+BISOS csPlayer is rooted in the model of interactive creation of command lines and running them.
+
+#+BEGIN: b:org:pypi:readme/pkgDocumentation :pkgName "csPlayer-cs" :comment "basic"
+
+# PYPI Documentation Comes Here in _description.org
+#+END:
+
+* Related Resources
+
+| bisos Panel | [[file:/bisos/panels/bisos-core/bisos-pip/bisos.csPlayer/_nodeBase_/fullUsagePanel-en.org]] |
+|             |                                                                                         |
+
+
+* Table of Contents     :TOC:
+- [[#overview][Overview]]
+- [[#related-resources][Related Resources]]
+- [[#model-and-structure-of-csxu-command-line][Model and Structure of CSXU Command-Line]]
+- [[#embedded-csplayer-capabilities-of-every-csxu][Embedded csPlayer Capabilities of Every CSXU]]
+- [[#types-of-csplayer-user-interfaces][Types of csPlayer User Interfaces]]
+  - [[#browser-based-csplayer][Browser Based csPlayer]]
+  - [[#blee-emacs-environment-based-csplayer][Blee (Emacs Environment) Based csPlayer]]
+  - [[#bash-command-line-completion-compgen][Bash Command-Line Completion (compgen)]]
+  - [[#graphviz-display-of-csxu-expectations][Graphviz Display of CSXU Expectations]]
+- [[#the-concept-of-csplayer-applications][The Concept of csPlayer-Applications]]
+- [[#the-django-restfull-framework-drf-performer][The Django Restfull Framework (drf) Performer]]
+- [[#the-pycs-loadable-modules-and-csmoduleplayers][The PyCS Loadable Modules and csModulePlayers]]
+- [[#the-bisosvarcsxu-hierarchy][The /bisos/var/csxu Hierarchy]]
+  - [[#the-bisosvarcsxupipxavailablecsxu-hierarchy][The /bisos/var/csxu/pipx/available/CSXU Hierarchy]]
+- [[#initial-csplayers-setup-and-configuration][Initial csPlayers Setup and Configuration]]
+  - [[#basic-csplayer-installation][Basic csPlayer Installation]]
+  - [[#minimal-bisosvarcsxupip_bisos3available-setup][Minimal /bisos/var/csxu/pip_bisos3/available Setup]]
+  - [[#update-all-csxus-cache-in-bisosvarcsxupip_bisos3available][Update All CSXUs Cache in /bisos/var/csxu/pip_bisos3/available]]
+  - [[#registering-the-libraries-with-django-csplayerperf][Registering the Libraries With Django csPlayerPerf]]
+
+* Model and Structure of CSXU Command-Line
+
+Model and structure of CSXU  command-line is described in:
+[[file:./ModelAndTerminology.org]]
+
+* Embedded csPlayer Capabilities of Every CSXU
+
+Every Player-Ready CSXU imports bisos.csPlayer.csxuFps_csu as a CSU.
+
+#+BEGIN_SRC python
+from bisos.csPlayer import csxuFps_csu
+
+csuList = [ 'bisos.csPlayer.csxuFps_csu', ]
+#+END_SRC
+
+And includes its examples:
+
+
+#+BEGIN_SRC python
+        csxuFps_csu.playerMenuExamples().pyCmnd()
+#+END_SRC
+
+Almost all CSXUs are Player-Ready.
+
+* Types of csPlayer User Interfaces
+
+There are currently 4 primary csPlayer types. More can be added.
+
+** Browser Based csPlayer
+
+Through your browser, you can construct CS Command lines and then execute them.
+
+The address of csLineInvoker is: [[http://csLineInvoker.here]].
+
+The broader csPlayer web services that inclues the csLineInvoker is:
+ [[http://csPlayerUi.here]]
+
+** Blee (Emacs Environment) Based csPlayer
+
+Similar to browser based csPlayer, there is an emacs interface for running CSXUs through emacs.
+
+** Bash Command-Line Completion (compgen)
+
+Every CSXU can produce its own compgen
+
+** Graphviz Display of CSXU Expectations
+
+Every CSXU can produce its own graphviz for visualization of its input expecations.
+
+* The Concept of csPlayer-Applications
+
+To configure and manage a given capability, canned command-lines for
+configuration and management of a set of CSXUs.
+
+For example, consider a wifi router, where a set of CSXUs, for DHCP, NAT, DNS, WiFi-Bridge
+are bundled together to create the equivalent of OpenWrt.
+
+csPlayer-Applications are extensions of the above mentioned "Browser Based csPlayer" and
+ "Blee Based csPlayer".
+
+A csPlayer-Application is different from a custom Web Application in that the model is that of a user
+just running command-lines to accomplish what she wants.
+
+* The Django Restfull Framework (drf) Performer
+
+We use the model and terminology of Invoker/Performer instead of the colloquial  Client/Server model.
+
+A Django DRF is running at  [[http://csPlayerPerformer.here/admin]]
+
+The csPalyerPerformer.here includes a Library extension model through which sets of
+CSXUs can be added to the scope of csPalyerPerformer.here.
+
+Addition of libraries to the csPalyerPerformer makes them visible at  [[http://csLineInvoker.here]]
+and  [[http://csPlayerUi.here]].
+
+The scope of operations  supported by csPlayerPerformer is not just those used by csLineInvoker.
+
+The csPlayerPerformer also provides general purpose OpenAPI services to CSXU-invokers and other
+invokers through the command-line sysntax.
+
+* The PyCS Loadable Modules and csModulePlayers
+
+Through https://github.com/bisos-pip/uploadAsCs and https://github.com/bisos-pip/tocsModules
+the PyCS-Framework allows for extension of CSXUs with "modules".
+
+Modules can be native or foreign. facterModule.mcs is an example of a native module.
+sonCli.mcs is an example of a foreign module.
+
+The model of a csPlayers is extended to also include modules. But the model of csPlayer is different
+from the csModulePlayer module. Here are the key differences.
+
+|-----------------+-----------------------------+-----------------------------------------------------|
+| Aspect          | CSXU csPlayer               | csModulePlayer                                      |
+|-----------------+-----------------------------+-----------------------------------------------------|
+|-----------------+-----------------------------+-----------------------------------------------------|
+| Executable      | Any CSXU                    | A Given CSXU.mcs                                    |
+|-----------------+-----------------------------+-----------------------------------------------------|
+| Parameters      | A Native PyCS Param         | Native: A parameter of the Module (not of csxu.mcs) |
+|                 |                             | Foreign: After translation to native params         |
+|-----------------+-----------------------------+-----------------------------------------------------|
+| Args vs Targets | Args from stdin or CLI      | Args of csxu.mcs are passed to Module as Targets    |
+|-----------------+-----------------------------+-----------------------------------------------------|
+| Destinations    | Delivered to CSXU as --Perf | Native: Delivered to CSXU-Invoker as --Perf         |
+|                 |                             | Foreign: passed to foreign ecosystem as server      |
+|-----------------+-----------------------------+-----------------------------------------------------|
+
+
+* The /bisos/var/csxu Hierarchy
+
+Under  /bisos/var/csxu, there are:
+
+- pip_bisos3      --- For executables of /bisos/venv/py3/bisos3/bin
+- pip_dev-bisos3  --- For executables of /bisos/venv/py3/dev-bisos3/bin
+- pipx            --- For executables of /bisos/pipx/bin
+- moduled         --- For modulePlayers .mcs
+
+Under each of the above directories, there is an "availble" directory.
+
+In the available directory, there is one directory by the name of each
+CSXU that has run its initialization Cmnd.
+
+The "available" dir is not intended to be used directly to specify sets of CSXUs.
+For any given set of CSXUs you can create a directory parallel to available and
+create symlinks to available from there. For example, we can have "enabled" in which
+only the relevant CSXU have symlinks. (this model is patterned after how apache and nginx do it).
+
+** The /bisos/var/csxu/pipx/available/CSXU Hierarchy
+
+Then under the /bisos/var/csxu/pipx/available/CSXU directory, you have
+
+- inSchema    --- Where the csxuCmndsFP (File Parameters) reside. This is the primary input info source
+
+- derived     --- Where derived scripts are kept
+
+- auditTrail  --- Where each execution is kept
+
+* Initial csPlayers Setup and Configuration
+
+** Basic csPlayer Installation
+
+csPlayer is an integral part of BISOS.
+A fresh installation of BISOS gives you everything you need.
+
+The following applies to situations, where you choose to update your existing BISOS environment
+which may be out of date.
+
+First upgrade all of your bisos pip packages.
+
+#+BEGIN_SRC bash
+/bisos/venv/py3/bisos3/bin/pip list | egrep '^bisos.' | cut -d ' ' -f 1 | xargs /bisos/venv/py3/bisos3/bin/pip install --upgrade
+#+END_SRC
+
+Next, make sure that bisos.csPlayer is the latest.
+
+#+BEGIN_SRC bash
+/bisos/venv/py3/bisos3/bin/pip install --upgrade bisos.csPlayer
+#+END_SRC
+
+** Minimal /bisos/var/csxu/pip_bisos3/available Setup
+
+Run the following to create a minimal /bisos/var/csxu/pip_bisos3/available setup.
+
+#+BEGIN_SRC bash
+/bisos/venv/py3/bisos3/bin/player.cs  -i csxuInSchemaFps --csxuFpsBasePath="/bisos/var/csxu/pip_bisos3/available"
+/bisos/venv/py3/bisos3/bin/facter.cs  -i csxuInSchemaFps --csxuFpsBasePath="/bisos/var/csxu/pip_bisos3/available"
+#+END_SRC
+
+Then create a minimal enabled setup.
+
+#+BEGIN_SRC bash
+mkdir -p /bisos/var/csxu/pip_bisos3/enabled
+ln -s /bisos/var/csxu/pip_bisos3/available/player.cs /bisos/var/csxu/pip_bisos3/enabled
+ln -s /bisos/var/csxu/pip_bisos3/available/facter.cs /bisos/var/csxu/pip_bisos3/enabled
+#+END_SRC
+
+
+** Update All CSXUs Cache in /bisos/var/csxu/pip_bisos3/available
+
+Run the following to create a minimal /bisos/var/csxu/pip_bisos3/available setup.
+
+#+BEGIN_SRC bash
+csPlayer-derived.cs --csxuFpsBasePath=/bisos/var/csxu/pip_bisos3/available -i availablesList | csPlayer-derived.cs -i availablesUpdate --csxuFpsBasePath="/bisos/var/csxu/pip_bisos3/available"
+#+END_SRC
+
+For example, for facter.cs this will create:
+
+#+BEGIN_SRC bash
+tree /bisos/var/csxu/pip_bisos3/available/facter.cs/derived
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+/bisos/var/csxu/pip_bisos3/available/facter.cs/derived
+├── cliCompgen.sh
+├── drfExecutable.py
+├── graphviz.pdf
+├── inSchemaDict.py
+#+END_EXAMPLE
+
+The drfExecutable.py delivers parameters and arguments information for the facter.cs CSXU to csPlayerPerf.
+
+** Registering the Libraries With Django csPlayerPerf
+
+In /bisos/git/bxRepos/cliGui/webCliGui/server, run:
+
+#+BEGIN_SRC bash
+manage.py register_library csLib csLib LibraryAPIImpl --description  'Command Services Library'
+manage.py register_library static  bisos.csPlayer.drf_csPlayer_static LibraryAPIImpl --description  'A Static CSXU Library For Testing'
+manage.py register_library pip:bisos3  bisos.csPlayer.drf_csPlayer_pipBisos3 LibraryAPIImpl --description  'pip bisos3 CSXUs'
+manage.py register_library pip:dev-bisos3  bisos.csPlayer.drf_csPlayer_pipDevBisos3 LibraryAPIImpl --description  'pip dev-bisos3 CSXUs'
+manage.py register_library pipx  bisos.csPlayer.drf_csPlayer_pipx LibraryAPIImpl --description  'pipx Packages and CSXUs'
+manage.py register_library modules:facter  bisos.csPlayer.drf_modPlayer_facter LibraryAPIImpl --description  'CSXU Modules for facterModule.cs'
+manage.py register_library modules:soncli  bisos.csPlayer.drf_modPlayer_soncli LibraryAPIImpl --description  'Uploadable Modules for soncli.cs'
+#+END_SRC
+
+
+
+
+# ###+BEGIN: blee:bxPanel:footerOrgParams :panelType "readme"
+#+STARTUP: overview
+#+STARTUP: lognotestate
+#+STARTUP: inlineimages
+#+SEQ_TODO: TODO WAITING DELEGATED | DONE DEFERRED CANCELLED
+#+TAGS: @desk(d) @home(h) @work(w) @withInternet(i) @road(r) call(c) errand(e)
+#+CATEGORY: U:csPlayer
+
+# ###+END:
+
+# ###+BEGIN: blee:bxPanel:footerEmacsParams :primMode "org-mode" :panelType "readme"
+# Local Variables:
+# eval: (setq-local toc-org-max-depth 4)
+# eval: (setq-local ~selectedSubject "noSubject")
+# eval: (setq-local ~primaryMajorMode 'org-mode)
+# eval: (setq-local ~blee:panelUpdater nil)
+# eval: (setq-local ~blee:dblockEnabler nil)
+# eval: (setq-local ~blee:dblockController "interactive")
+# eval: (img-link-overlays)
+# eval: (set-fill-column 115)
+# eval: (blee:fill-column-indicator/enable)
+# eval: (bx:load-file:ifOneExists "./panelActions.el")
+# End:
+
+# ###+END

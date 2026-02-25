@@ -172,7 +172,7 @@ class examples_csu(cs.Cmnd):
         cmnd('availablesList', pars=od(list(csxuFpsBasePars.items())), comment=f"# List Available CSXUs")
 
         cmnd('availablesUpdate', pars=od(list(csxuFpsBasePars.items())), args=oneCsxu, comment=f"# Update Available CSXUs")
-        cmnd('availablesUpdate', pars=od(list(csxuFpsBasePars.items())), wrapper=f"{csxuName} -i availablesList |",  comment=f"# Update Available CSXUs")
+        cmnd('availablesUpdate', pars=od(list(csxuFpsBasePars.items())), wrapper=f"{csxuName} --csxuFpsBasePath={csxuFpsBase} -i availablesList |",  comment=f"# Update Available CSXUs")
 
         return(cmndOutcome)
 
@@ -392,7 +392,13 @@ class availablesUpdate(cs.Cmnd):
                     f"""{each} -i csxuInSchemaFps --csxuFpsBasePath="{csxuFpsBasePath}\"""",
             ).isProblematic():  
                 return(b_io.eh.badOutcome(cmndOutcome))
-            
+
+            if b.subProc.Op(outcome=cmndOutcome, log=1,).bash(
+                    f"""{each} -i csxuFpsToPyDict --csxuFpsBasePath="{csxuFpsBasePath}\"""",
+            ).isProblematic():
+                return(b_io.eh.badOutcome(cmndOutcome))
+
+
             # 2. Generate GraphViz PDF diagram
             if b.subProc.Op(outcome=cmndOutcome, log=1,).bash(
                     f"""{each} -i csxuFpsToGraphviz --csxuFpsBasePath="{csxuFpsBasePath}" --csxuName="{each}" --csxuDerivedBasePath="{csxu_derived_base}\"""",

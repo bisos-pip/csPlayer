@@ -147,7 +147,7 @@ def commonParamsSpecify(
         parName='csxuDerivedBasePath',
         parDescription=f"Path to a directory in which csxu derived files can be found. Defaults to /bisos/var/csxu/{cs.G.icmMyName()}",
         parDataType=None,
-        parDefault=f"/bisos/var/csxu/pip_dev-bisos3/available/{cs.G.icmMyName()}/derived",
+        parDefault=f"derived",
         parChoices=[],
         argparseShortOpt=None,
         argparseLongOpt='--csxuDerivedBasePath',
@@ -614,6 +614,38 @@ def create_graphviz_diagram(params_dict_input, csxu_name):
     
     return dot
 
+
+####+BEGIN: b:py3:cs:func/typing :funcName "csxuDerivedBasePathObtain" :funcType "extTyped" :deco "track"
+""" #+begin_org
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(outline-show-branches+toggle)][|=]] [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  F-T-extTyped [[elisp:(outline-show-subtree+toggle)][||]] /csxuDerivedBasePathObtain/  deco=track  [[elisp:(org-cycle)][| ]]
+#+end_org """
+@cs.track(fnLoc=True, fnEntry=True, fnExit=True)
+def csxuDerivedAbsPathObtain(
+####+END:
+        csxuFpsBasePath: str,
+        csxuName: str,
+        csxuDerivedBasePath: str,
+) -> Path | None:
+    """ #+begin_org
+** [[elisp:(org-cycle)][| *DocStr | ]
+    #+end_org """
+
+    csxuDerivedBasePath = Path(csxuDerivedBasePath)
+    if csxuDerivedBasePath.is_absolute():
+        return csxuDerivedBasePath
+
+    csxu_path = Path(csxuFpsBasePath) / csxuName
+    if not csxu_path.is_dir():
+        return None
+
+    derivedPath = csxu_path / csxuDerivedBasePath
+
+    if not derivedPath.is_dir():
+        return None
+
+    return derivedPath
+
+
 def load_params_dict_from_file(pydict_file_path):
     """
     Load the parameters dictionary from a Python dictionary file.
@@ -732,7 +764,10 @@ class csxuFpsToPyDict(cs.Cmnd):
         # Resolve path: if relative, prepend csxuDerivedBasePath
         output_path = Path(pyDictResultPath)
         if not output_path.is_absolute():
-            output_path = Path(csxuDerivedBasePath) / output_path
+            derivedAbsPath = csxuDerivedAbsPathObtain(csxuFpsBasePath, csxuName, csxuDerivedBasePath)
+            if derivedAbsPath is None:
+                return b_io.eh.badOutcome(cmndOutcome, f"Missing derived")
+            output_path = derivedAbsPath / output_path
         
         if write_dict_to_file(output_dict, str(output_path)):
             pass  # Success - continue to return cmndOutcome below
@@ -780,61 +815,67 @@ class csxuFpsToGraphviz(cs.Cmnd):
 ** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Generate Graphviz diagram from CSXU parameters dictionary.
         #+end_org """)
 
-        try:
-            # Load the parameters dictionary from the file created by csxuFpsToPyDict
-            if not pyDictResultPath:
-                return b_io.eh.badOutcome(cmndOutcome, "pyDictResultPath is required")
-            
-            # Resolve path: if relative, prepend csxuDerivedBasePath
-            pydict_path = Path(pyDictResultPath)
-            if not pydict_path.is_absolute():
-                pydict_path = Path(csxuDerivedBasePath) / pydict_path
-            
-            params_dict = load_params_dict_from_file(str(pydict_path))
-            
-            if not params_dict:
-                return b_io.eh.badOutcome(cmndOutcome, "Failed to load parameters dictionary")
-            
-            # Verify the CSXU exists in the dictionary
-            if csxuName not in params_dict:
-                available = list(params_dict.keys())
-                return b_io.eh.badOutcome(cmndOutcome, f"CSXU '{csxuName}' not found. Available: {available}")
-            
-            # Create filtered dictionary containing only the requested CSXU
-            filtered_dict = {csxuName: params_dict[csxuName]}
-            
-            # Generate the Graphviz diagram
-            dot = create_graphviz_diagram(filtered_dict, csxuName)
-            
-            # Save the diagram to file
-            # Resolve path: if relative, prepend csxuDerivedBasePath
-            output_path_obj = Path(graphvizResultPath)
-            if not output_path_obj.is_absolute():
-                output_path_obj = Path(csxuDerivedBasePath) / output_path_obj
-            
-            output_dir = output_path_obj.parent
-            output_base = output_path_obj.stem  # Filename without extension
-            
-            # Create output directory if needed
-            output_dir.mkdir(parents=True, exist_ok=True)
-            
-            # Render the diagram (format='pdf' is already set in the Digraph)
-            output_file = str(output_dir / output_base)
-            dot.render(output_file, cleanup=True)
-            # Verify the PDF was created
-            pdf_file = Path(f"{output_file}.pdf")
-            if not pdf_file.exists():
-                return b_io.eh.badOutcome(cmndOutcome, f"Failed to create PDF file at {pdf_file}")
+        # try:
+        # Load the parameters dictionary from the file created by csxuFpsToPyDict
+        if not pyDictResultPath:
+            return b_io.eh.badOutcome(cmndOutcome, "pyDictResultPath is required")
 
-            return cmndOutcome.set(
-                opError=b.OpError.Success,
-                opResults=output_path_obj,
-            )
+        # Resolve path: if relative, prepend csxuDerivedBasePath
+        pydict_path = Path(pyDictResultPath)
+        if not pydict_path.is_absolute():
+            derivedAbsPath = csxuDerivedAbsPathObtain(csxuFpsBasePath, csxuName, csxuDerivedBasePath)
+            if derivedAbsPath is None:
+                return b_io.eh.badOutcome(cmndOutcome, f"Missing derived")
+            pydict_path = derivedAbsPath / pydict_path
 
-        except FileNotFoundError as e:
-            return b_io.eh.badOutcome(cmndOutcome, f"File not found: {e}")
-        except Exception as e:
-            return b_io.eh.badOutcome(cmndOutcome, f"Error generating Graphviz diagram: {e}")
+        params_dict = load_params_dict_from_file(str(pydict_path))
+
+        if not params_dict:
+            return b_io.eh.badOutcome(cmndOutcome, "Failed to load parameters dictionary")
+
+        # Verify the CSXU exists in the dictionary
+        if csxuName not in params_dict:
+            available = list(params_dict.keys())
+            return b_io.eh.badOutcome(cmndOutcome, f"CSXU '{csxuName}' not found. Available: {available}")
+
+        # Create filtered dictionary containing only the requested CSXU
+        filtered_dict = {csxuName: params_dict[csxuName]}
+
+        # Generate the Graphviz diagram
+        dot = create_graphviz_diagram(filtered_dict, csxuName)
+
+        # Save the diagram to file
+        # Resolve path: if relative, prepend csxuDerivedBasePath
+        output_path_obj = Path(graphvizResultPath)
+        if not output_path_obj.is_absolute():
+            derivedAbsPath = csxuDerivedAbsPathObtain(csxuFpsBasePath, csxuName, csxuDerivedBasePath)
+            if derivedAbsPath is None:
+                return b_io.eh.badOutcome(cmndOutcome, f"Missing derived")
+            output_path_obj = derivedAbsPath / output_path_obj
+
+        output_dir = output_path_obj.parent
+        output_base = output_path_obj.stem  # Filename without extension
+
+        # Create output directory if needed
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        # Render the diagram (format='pdf' is already set in the Digraph)
+        output_file = str(output_dir / output_base)
+        dot.render(output_file, cleanup=True)
+        # Verify the PDF was created
+        pdf_file = Path(f"{output_file}.pdf")
+        if not pdf_file.exists():
+            return b_io.eh.badOutcome(cmndOutcome, f"Failed to create PDF file at {pdf_file}")
+
+        return cmndOutcome.set(
+            opError=b.OpError.Success,
+            opResults=output_path_obj,
+        )
+
+        # except FileNotFoundError as e:
+        #     return b_io.eh.badOutcome(cmndOutcome, f"File not found: {e}")
+        # except Exception as e:
+        #     return b_io.eh.badOutcome(cmndOutcome, f"Error generating Graphviz diagram: {e}")
 
 
 ####+BEGIN: b:py3:cs:cmnd/classHead :cmndName "inSchema" :comment "" :extent "verify" :ro "cli" :parsMand "" :parsOpt "csxuFpsBasePath csxuName csxuDerivedBasePath pyDictResultPath  graphvizResultPath" :argsMin 1 :argsMax 1 :pyInv ""
@@ -893,7 +934,10 @@ player.cs -i inSchema pdf-evince
         # Resolve path: if relative, prepend csxuDerivedBasePath
         output_path_obj = Path(graphvizResultPath)
         if not output_path_obj.is_absolute():
-            output_path_obj = Path(csxuDerivedBasePath) / output_path_obj
+            derivedAbsPath = csxuDerivedAbsPathObtain(csxuFpsBasePath, csxuName, csxuDerivedBasePath)
+            if derivedAbsPath is None:
+                return b_io.eh.badOutcome(cmndOutcome, f"Missing derived")
+            output_path_obj = derivedAbsPath / output_path_obj
 
         pdf_file = output_path_obj
 
@@ -978,56 +1022,63 @@ class csxuFpsToCliCompgen(cs.Cmnd):
 ** [[elisp:(org-cycle)][| *CmndDesc:* | ]]  Create cliCompgenResultPath
         #+end_org """)
 
-        try:
-            # Load the parameters dictionary from the file created by csxuFpsToPyDict
-            if not pyDictResultPath:
-                return b_io.eh.badOutcome(cmndOutcome, "pyDictResultPath is required")
+        # try:
+        # Load the parameters dictionary from the file created by csxuFpsToPyDict
+        if not pyDictResultPath:
+            return b_io.eh.badOutcome(cmndOutcome, "pyDictResultPath is required")
+
+         # Resolve path: if relative, prepend csxuDerivedBasePath
+        pydict_path = Path(pyDictResultPath)
+        if not pydict_path.is_absolute():
+            derivedAbsPath = csxuDerivedAbsPathObtain(csxuFpsBasePath, csxuName, csxuDerivedBasePath)
+            if derivedAbsPath is None:
+                return b_io.eh.badOutcome(cmndOutcome, f"Missing derived")
+            pydict_path = derivedAbsPath / pydict_path
+
+        if not pydict_path.exists():
+            return b_io.eh.badOutcome(cmndOutcome, f"Dictionary file not found: {pydict_path}")
+
+        params_dict = load_params_dict_from_file(str(pydict_path))
+
+        if not params_dict:
+            return b_io.eh.badOutcome(cmndOutcome, "Failed to load parameters dictionary")
+
+        # Verify the CSXU exists in the dictionary
+        if csxuName not in params_dict:
+            available = list(params_dict.keys())
+            return b_io.eh.badOutcome(cmndOutcome, f"CSXU '{csxuName}' not found. Available: {available}")
+
+        # Extract commands and parameters from the dictionary
+        csxu_data = params_dict[csxuName]
+        if 'inSchema' not in csxu_data or 'csxuCmndsFp' not in csxu_data['inSchema']:
+            return b_io.eh.badOutcome(cmndOutcome, "Invalid dictionary structure: missing inSchema/csxuCmndsFp")
+
+        commands = csxu_data['inSchema']['csxuCmndsFp']
+        params_fp = csxu_data['inSchema'].get('paramsFp', {})
+
+        # Generate bash completion script
+        bash_script = generate_bash_completion(csxuName, commands, params_fp)
+
+        # Write to file
+        # Resolve path: if relative, prepend csxuDerivedBasePath
+        output_file = Path(cliCompgenResultPath)
+        if not output_file.is_absolute():
+            derivedAbsPath = csxuDerivedAbsPathObtain(csxuFpsBasePath, csxuName, csxuDerivedBasePath)
+            if derivedAbsPath is None:
+                return b_io.eh.badOutcome(cmndOutcome, f"Missing derived")
+            output_file = derivedAbsPath / output_file
+
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        output_file.write_text(bash_script, encoding='utf-8')
+
+        return cmndOutcome.set(
+            opError=b.OpError.Success,
+            # opResults=str(output_file),
+            opResults=f"source {output_file}",
+        )
             
-            # Resolve path: if relative, prepend csxuDerivedBasePath
-            pydict_path = Path(pyDictResultPath)
-            if not pydict_path.is_absolute():
-                pydict_path = Path(csxuDerivedBasePath) / pydict_path
-            
-            if not pydict_path.exists():
-                return b_io.eh.badOutcome(cmndOutcome, f"Dictionary file not found: {pydict_path}")
-            
-            params_dict = load_params_dict_from_file(str(pydict_path))
-            
-            if not params_dict:
-                return b_io.eh.badOutcome(cmndOutcome, "Failed to load parameters dictionary")
-            
-            # Verify the CSXU exists in the dictionary
-            if csxuName not in params_dict:
-                available = list(params_dict.keys())
-                return b_io.eh.badOutcome(cmndOutcome, f"CSXU '{csxuName}' not found. Available: {available}")
-            
-            # Extract commands and parameters from the dictionary
-            csxu_data = params_dict[csxuName]
-            if 'inSchema' not in csxu_data or 'csxuCmndsFp' not in csxu_data['inSchema']:
-                return b_io.eh.badOutcome(cmndOutcome, "Invalid dictionary structure: missing inSchema/csxuCmndsFp")
-            
-            commands = csxu_data['inSchema']['csxuCmndsFp']
-            params_fp = csxu_data['inSchema'].get('paramsFp', {})
-            
-            # Generate bash completion script
-            bash_script = generate_bash_completion(csxuName, commands, params_fp)
-            
-            # Write to file
-            # Resolve path: if relative, prepend csxuDerivedBasePath
-            output_file = Path(cliCompgenResultPath)
-            if not output_file.is_absolute():
-                output_file = Path(csxuDerivedBasePath) / output_file
-            output_file.parent.mkdir(parents=True, exist_ok=True)
-            output_file.write_text(bash_script, encoding='utf-8')
-            
-            return cmndOutcome.set(
-                opError=b.OpError.Success,
-                # opResults=str(output_file),
-                opResults=f"source {output_file}",
-            )
-            
-        except Exception as e:
-            return b_io.eh.badOutcome(cmndOutcome, f"Error generating bash completion: {e}")
+        # except Exception as e:
+        #     return b_io.eh.badOutcome(cmndOutcome, f"Error generating bash completion: {e}")
 
 
 def generate_bash_completion(csxu_name, commands, params_fp):
@@ -1269,7 +1320,11 @@ class csxuFpsToDrfExecInfo(cs.Cmnd):
 
         output_file = Path(drfExecPath)
         if not output_file.is_absolute():
-            output_file = Path(csxuDerivedBasePath) / output_file
+            derivedAbsPath = csxuDerivedAbsPathObtain(csxuFpsBasePath, csxuName, csxuDerivedBasePath)
+            if derivedAbsPath is None:
+                return b_io.eh.badOutcome(cmndOutcome, f"Missing derived")
+            output_file = derivedAbsPath / output_file
+
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
         return cmndOutcome.set(
@@ -1315,48 +1370,54 @@ class csxuFpsToDrfExecutable(cs.Cmnd):
    that can be dynamically imported to populate operationsData for the DRF backend.
         #+end_org """)
 
-        try:
-            # Load the parameters dictionary from the file created by csxuFpsToPyDict
-            if not pyDictResultPath:
-                return b_io.eh.badOutcome(cmndOutcome, "pyDictResultPath is required")
+        # try:
+        # Load the parameters dictionary from the file created by csxuFpsToPyDict
+        if not pyDictResultPath:
+            return b_io.eh.badOutcome(cmndOutcome, "pyDictResultPath is required")
+
+        # Resolve path: if relative, prepend csxuDerivedBasePath
+        pydict_path = Path(pyDictResultPath)
+        if not pydict_path.is_absolute():
+            derivedAbsPath = csxuDerivedAbsPathObtain(csxuFpsBasePath, csxuName, csxuDerivedBasePath)
+            if derivedAbsPath is None:
+                return b_io.eh.badOutcome(cmndOutcome, f"Missing derived")
+            pydict_path = derivedAbsPath / pydict_path
+
+        params_dict = load_params_dict_from_file(str(pydict_path))
+
+        if not params_dict:
+            return b_io.eh.badOutcome(cmndOutcome, "Failed to load parameters dictionary")
+
+        # Verify the CSXU exists in the dictionary
+        if csxuName not in params_dict:
+            available = list(params_dict.keys())
+            return b_io.eh.badOutcome(cmndOutcome, f"CSXU '{csxuName}' not found. Available: {available}")
+
+        # Generate the DRF Executable code
+        drf_code = generate_drf_executable(csxuName, params_dict[csxuName])
+
+        if not drf_code:
+            return b_io.eh.badOutcome(cmndOutcome, "Failed to generate DRF executable code")
+
+        # Write to file
+        # Resolve path: if relative, prepend csxuDerivedBasePath
+        output_path = Path(drfExecPath)
+        if not output_path.is_absolute():
+            derivedAbsPath = csxuDerivedAbsPathObtain(csxuFpsBasePath, csxuName, csxuDerivedBasePath)
+            if derivedAbsPath is None:
+                return b_io.eh.badOutcome(cmndOutcome, f"Missing derived")
+            output_path = derivedAbsPath / output_path
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(drf_code, encoding='utf-8')
+
+        return cmndOutcome.set(
+            opError=b.OpError.Success,
+            opResults=str(output_path),
+        )
             
-            # Resolve path: if relative, prepend csxuDerivedBasePath
-            pydict_path = Path(pyDictResultPath)
-            if not pydict_path.is_absolute():
-                pydict_path = Path(csxuDerivedBasePath) / pydict_path
-            
-            params_dict = load_params_dict_from_file(str(pydict_path))
-            
-            if not params_dict:
-                return b_io.eh.badOutcome(cmndOutcome, "Failed to load parameters dictionary")
-            
-            # Verify the CSXU exists in the dictionary
-            if csxuName not in params_dict:
-                available = list(params_dict.keys())
-                return b_io.eh.badOutcome(cmndOutcome, f"CSXU '{csxuName}' not found. Available: {available}")
-            
-            # Generate the DRF Executable code
-            drf_code = generate_drf_executable(csxuName, params_dict[csxuName])
-            
-            if not drf_code:
-                return b_io.eh.badOutcome(cmndOutcome, "Failed to generate DRF executable code")
-            
-            # Write to file
-            # Resolve path: if relative, prepend csxuDerivedBasePath
-            output_path = Path(drfExecPath)
-            if not output_path.is_absolute():
-                output_path = Path(csxuDerivedBasePath) / output_path
-            
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            output_path.write_text(drf_code, encoding='utf-8')
-            
-            return cmndOutcome.set(
-                opError=b.OpError.Success,
-                opResults=str(output_path),
-            )
-            
-        except Exception as e:
-            return b_io.eh.badOutcome(cmndOutcome, f"Error generating DRF executable: {e}")
+        # except Exception as e:
+        #     return b_io.eh.badOutcome(cmndOutcome, f"Error generating DRF executable: {e}")
 
 
 def generate_drf_executable(csxu_name: str, csxu_data: dict) -> str:

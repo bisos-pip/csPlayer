@@ -16,6 +16,12 @@ import importlib.util
 
 logger = logging.getLogger(__name__)
 
+def csxuFolderObtain(
+      csxuFolder: drf.OperationFolder,
+) -> drf.OperationFolder | None:
+    """ Duplicated here so that auditTrail_csu can be hidden from the drf lib. """
+    return auditTrail_csu.csxuFolderObtain(csxuFolder)
+
 def executablesInfo_load(executablesFolderName: str,) -> None:
     """ Walkthrough and load CSXU operations from enabled directory based on folder name """
 
